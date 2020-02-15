@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "997242242940",
+    "firebase_url": "https://mrpenn-b0d32.firebaseio.com",
+    "project_id": "mrpenn-b0d32",
+    "storage_bucket": "mrpenn-b0d32.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997242242940:android:d7a78111b2623a125d06f9",
+        "android_client_info": {
+          "package_name": "giubox.mrpenn_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "997242242940-kh74sbdbu3ap11ir68fdemdihrm03s95.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "giubox.mrpenn_flutter",
+            "certificate_hash": "adf1b34b897d722969bbd445e19a1b4a870480df"
+          }
+        },
+        {
+          "client_id": "997242242940-tg96k8453l740vngcuc5fa114j132fvh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy7wr-ytlEFoO5IgdX2sDisEkLlyY3Cvk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "997242242940-tg96k8453l740vngcuc5fa114j132fvh.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
