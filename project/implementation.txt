@@ -1,0 +1,29 @@
+App: new transaction, view/delete/update transactions, statistics
+
+split file by month (yymm): transactions, monthly partials for categories, entities
+store: lastID (yymmnnnnn), active entities, all and the active categories, preferred entities, preferred categories, entities in total, initial balances, categories values, up to now partials (initial excluded) for categories, entities, 
+	to return transactions ids and data; all the data for the graph entity-month
+
+New transaction:
+	on send, request file for month if exists, else create it, then update it (increase unique id), upload it
+	update the statistics
+
+view transaction:
+	request file for this month, show data if exists, if necessary request file for previous months
+
+delete transaction:
+	update the file, upload it
+	update the statistics of that month and the main statistics
+
+update transaction:
+	delete old, insert new --> handle rollback special care for to return (no hassle)
+
+statistics:
+	request the data, show it.
+
+
+roadmap:
+	model
+	initial mock backend
+	frontend (update backend specifications when necessary)
+	backend (google drive?)

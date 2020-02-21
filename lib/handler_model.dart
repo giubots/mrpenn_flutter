@@ -41,18 +41,3 @@ class Transaction {
     this.returnId = -1,
   }) : dateTime = dateTime ?? DateTime.now();
 }
-
-class User {
-  final String name;
-  final String userId;
-
-  final List<String> entities;
-  final List<String> categories;
-
-  User({
-    @required this.name,
-    @required this.userId,
-    @required this.entities,
-    @required this.categories,
-  });
-}
