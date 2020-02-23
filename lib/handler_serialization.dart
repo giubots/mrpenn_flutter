@@ -1,5 +1,14 @@
 import 'model.dart';
 
+/// This represents an object that can provide the app data to the front end.
+abstract class DataInterface {
+  factory DataInterface() {
+    return _MockData();
+  }
+}
+
+class _MockData implements DataInterface {}
+
 /// A collection of transactions with some data associated with it.
 class TransactionsLog {
   String fileName;
