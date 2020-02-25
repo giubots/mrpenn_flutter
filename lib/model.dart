@@ -15,7 +15,7 @@ class Transaction {
   final Entity destinationEntity;
 
   /// The category for this transaction.
-  final List<Category> category;
+  final List<Category> categories;
 
   /// Whether this transaction has to be returned. False by default.
   final bool toReturn;
@@ -35,14 +35,37 @@ class Transaction {
     @required this.amount,
     @required this.originEntity,
     @required this.destinationEntity,
-    @required this.category,
+    categories,
     this.toReturn = false,
     DateTime dateTime,
     this.notes = '',
     this.returnId = -1,
   })  : dateTime = dateTime ?? DateTime.now(),
+        categories = categories ?? [],
         assert(amount >= 0),
         assert(id != returnId);
+
+  /// A transaction when it has not an id number yet.
+  Transaction.temporary({
+    @required amount,
+    @required originEntity,
+    @required destinationEntity,
+    categories,
+    toReturn,
+    DateTime dateTime,
+    notes,
+    returnId,
+  }) : this(
+          id: -1,
+          amount: amount,
+          originEntity: originEntity,
+          destinationEntity: destinationEntity,
+          categories: categories,
+          toReturn: toReturn,
+          dateTime: dateTime,
+          notes: notes,
+          returnId: returnId,
+        );
 }
 
 /// A component that can be used in the transactions.

@@ -24,12 +24,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context).homeTitle),
+        title: Text(Loc.of(context).homeTitle),
         bottom: TabBar(
           controller: _tabController,
           tabs: <Tab>[
-            Tab(text: AppLocalizations.of(context).hudTitle.toUpperCase()),
-            Tab(text: AppLocalizations.of(context).seeAllTitle.toUpperCase()),
+            Tab(text: Loc.of(context).hudTitle.toUpperCase()),
+            Tab(text: Loc.of(context).seeAllTitle.toUpperCase()),
           ],
         ),
       ),
@@ -50,7 +50,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _onFABPressed() => Navigator.pushNamed(context, widget.newDataRouteName);
+  void _onFABPressed() => Navigator.pushNamed(context, widget.newDataRouteName);//TODO full screen dialog?
 }
 
 class Test extends StatelessWidget {
