@@ -15,7 +15,7 @@ class Transaction {
   final Entity destinationEntity;
 
   /// The category for this transaction.
-  final List<Category> categories;
+  final Set<Category> categories;
 
   /// Whether this transaction has to be returned. False by default.
   final bool toReturn;
@@ -41,7 +41,7 @@ class Transaction {
     this.notes = '',
     this.returnId = -1,
   })  : dateTime = dateTime ?? DateTime.now(),
-        categories = categories ?? [],
+        categories = categories ?? {},
         assert(amount >= 0),
         assert(id != returnId);
 

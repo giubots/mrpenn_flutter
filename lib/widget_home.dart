@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:mrpenn_flutter/handler_serialization.dart';
 import 'package:mrpenn_flutter/localization/localization.dart';
+import 'package:mrpenn_flutter/widget_newdata.dart';
+
+import 'model.dart';
 
 class Home extends StatefulWidget {
   final newDataRouteName;
@@ -24,20 +28,24 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Loc.of(context).homeTitle),
+        title: Text(AppLocalizations.of(context).homeTitle),
         bottom: TabBar(
           controller: _tabController,
           tabs: <Tab>[
-            Tab(text: Loc.of(context).hudTitle.toUpperCase()),
-            Tab(text: Loc.of(context).seeAllTitle.toUpperCase()),
+            Tab(text: AppLocalizations.of(context).hudTitle.toUpperCase()),
+            Tab(text: AppLocalizations.of(context).seeAllTitle.toUpperCase()),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
         children: <Widget>[
-           Test(), //TODO
           Test(), //TODO
+          ListView(
+              children: DataInterface()
+                  .temp()
+                  .map((e) => TransactionDetails(transaction: e))
+                  .toList()), //TODO
         ],
       ),
       floatingActionButton: FloatingActionButton(onPressed: _onFABPressed),
@@ -50,7 +58,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _onFABPressed() => Navigator.pushNamed(context, widget.newDataRouteName);//TODO full screen dialog?
+  void _onFABPressed() => Navigator.pushNamed(
+      context, widget.newDataRouteName); //TODO full screen dialog?
 }
 
 class Test extends StatelessWidget {
@@ -61,3 +70,5 @@ class Test extends StatelessWidget {
     );
   }
 }
+
+

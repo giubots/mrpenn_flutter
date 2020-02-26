@@ -6,11 +6,13 @@ abstract class DataInterface {
     return _MockData();
   }
 
-  Future<List<Entity>> getActiveEntities();
+  Future<Set<Entity>> getActiveEntities();
 
-  Future<List<Category>> getActiveCategories();
+  Future<Set<Category>> getActiveCategories();
 
-  Future<List<Transaction>> getToReturn();
+  Future<Set<Transaction>> getToReturn();
+
+  List<Transaction> temp();
 }
 
 class _MockData implements DataInterface {
@@ -32,6 +34,7 @@ class _MockData implements DataInterface {
       id: 10,
       toReturn: true,
       notes: 'abc',
+      dateTime: DateTime.now().subtract(Duration(days: 2)),
     ),
     Transaction(
       amount: 20,
@@ -40,21 +43,25 @@ class _MockData implements DataInterface {
       id: 30,
       toReturn: true,
       notes: 'def',
+      dateTime: DateTime.now(),
     ),
   ];
 
   @override
-  Future<List<Entity>> getActiveEntities() =>
-      Future.delayed(Duration(seconds: 3), () => entities);
+  Future<Set<Entity>> getActiveEntities() =>
+      Future.delayed(Duration(seconds: 3), () => entities.toSet());
 
   @override
-  Future<List<Category>> getActiveCategories() =>
-      Future.delayed(Duration(seconds: 3), () => categories);
+  Future<Set<Category>> getActiveCategories() =>
+      Future.delayed(Duration(seconds: 3), () => categories.toSet());
 
   @override
-  Future<List<Transaction>> getToReturn() => Future.delayed(
+  Future<Set<Transaction>> getToReturn() => Future.delayed(
       Duration(seconds: 3),
-      () => transactions.where((element) => element.toReturn).toList());
+      () => transactions.where((element) => element.toReturn).toSet());
+
+  @override
+  List<Transaction> temp() => transactions;
 }
 
 /// A collection of transactions with some data associated with it.

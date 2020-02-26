@@ -7,6 +7,8 @@ import 'package:mrpenn_flutter/handler_serialization.dart';
 import 'package:mrpenn_flutter/localization/localization.dart';
 import 'package:mrpenn_flutter/model.dart';
 
+final _dateFormatter = DateFormat('dd/MM/yyyy');
+
 /// Start loading the data and then shows a [TransactionForm].
 class NewData extends StatelessWidget {
   final _dataHolder = _DataHolder().future;
@@ -16,7 +18,7 @@ class NewData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(Loc.of(context).newDataTitle)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).newDataTitle)),
       body: FutureBuilder<_DataHolder>(
         future: _dataHolder,
         builder: (context, snapshot) {
@@ -24,9 +26,10 @@ class NewData extends StatelessWidget {
             return SingleChildScrollView(
               padding: EdgeInsets.only(left: 8.0, right: 8.0),
               child: TransactionForm(
-                categories: snapshot.data.categories,
-                entities: snapshot.data.entities,
-                toReturn: snapshot.data.toReturn,
+                availableCategories: snapshot.data.categories,
+                availableEntities: snapshot.data.entities,
+                availableToReturn: snapshot.data.toReturn,
+                onSubmit: (transaction) => null, //TODO
               ),
             );
           }
@@ -39,9 +42,9 @@ class NewData extends StatelessWidget {
 
 /// Allows to load multiple data in a single Future and then retrieve it.
 class _DataHolder {
-  List<Entity> entities;
-  List<Category> categories;
-  List<Transaction> toReturn;
+  Set<Entity> entities;
+  Set<Category> categories;
+  Set<Transaction> toReturn;
 
   Future<_DataHolder> get future async {
     var data = await Future.wait([
@@ -58,15 +61,17 @@ class _DataHolder {
 
 /// Main form for inserting the data.
 class TransactionForm extends StatefulWidget {
-  final List<Category> categories;
-  final List<Entity> entities;
-  final List<Transaction> toReturn;
+  final Set<Category> availableCategories;
+  final Set<Entity> availableEntities;
+  final Set<Transaction> availableToReturn;
+  final void Function(Transaction) onSubmit;
 
   TransactionForm({
     Key key,
-    @required this.categories,
-    @required this.entities,
-    @required this.toReturn,
+    @required this.availableCategories,
+    @required this.availableEntities,
+    @required this.availableToReturn,
+    @required this.onSubmit,
   }) : super(key: key);
 
   @override
@@ -74,45 +79,25 @@ class TransactionForm extends StatefulWidget {
 }
 
 class _TransactionFormState extends State<TransactionForm> {
-  final _dateFormatter = DateFormat('dd/MM/yyyy');
   final _notEmptyValidator = (context, value) =>
-      value == null ? Loc.of(context).emptyFieldError : null;
-  final _isDoubleValidator = (context, value) =>
-      (double.tryParse(value) ?? -1) < 0 ? Loc.of(context).amountError : null;
+      value == null ? AppLocalizations.of(context).emptyFieldError : null;
   final _formKey = GlobalKey<FormState>();
-
-  final _amountController = TextEditingController();
-  final _dateController = TextEditingController();
-  final _notesController = TextEditingController();
 
   double amount;
   Entity originEntity;
   Entity destinationEntity;
-  List<Category> selectedCategories = [];
+  Set<Category> selectedCategories = {};
   DateTime dateTime = DateTime.now();
   String notes;
   bool toReturn = false;
   Transaction returning;
 
   @override
-  void initState() {
-    super.initState();
-    _dateController.text = _dateFormatter.format(dateTime);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final entityButtons = widget.entities.map((e) {
+    final entityButtons = widget.availableEntities.map((e) {
       return DropdownMenuItem(
         value: e,
         child: Text(e.name),
-      );
-    }).toList();
-
-    final categoryButtons = widget.categories.map((c) {
-      return DropdownMenuItem(
-        value: c,
-        child: Text(c.name),
       );
     }).toList();
 
@@ -125,150 +110,90 @@ class _TransactionFormState extends State<TransactionForm> {
           TextFormField(
             keyboardType: TextInputType.number,
             inputFormatters: [WhitelistingTextInputFormatter(RegExp('[0-9.]'))],
-            decoration: InputDecoration(labelText: Loc.of(context).amountLabel),
-            validator: (value) => _isDoubleValidator(context, value),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).amountLabel),
+            validator: (value) => (double.tryParse(value) ?? -1) < 0
+                ? AppLocalizations.of(context).amountError
+                : null,
             onSaved: (newValue) => amount = double.parse(newValue),
           ),
           DropdownButtonFormField(
             items: entityButtons,
-            decoration: InputDecoration(labelText: Loc.of(context).originLabel),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).originLabel),
             validator: (value) => _notEmptyValidator(context, value),
             onChanged: (value) => null,
             onSaved: (newValue) => originEntity = newValue,
           ),
           DropdownButtonFormField(
             items: entityButtons,
-            decoration:
-                InputDecoration(labelText: Loc.of(context).destinationLabel),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).destinationLabel),
             validator: (value) => _notEmptyValidator(context, value),
             onChanged: (value) => null,
             onSaved: (newValue) => destinationEntity = newValue,
           ),
-          DropdownButtonFormField(
-            items: categoryButtons,
-            decoration:
-                InputDecoration(labelText: Loc.of(context).categoryLabel),
-            onChanged: _onAddCategory,
+          DropdownAndChipsFormField<Category>(
+            nameBuilder: (c) => c.name,
+            labelText: AppLocalizations.of(context).categoryLabel,
+            items: widget.availableCategories,
+            onSaved: (newValue) => selectedCategories = newValue,
           ),
-          Wrap(
-            spacing: 4.0,
-            children: selectedCategories
-                .map((c) => Chip(
-                      label: Text(c.name),
-                      onDeleted: () =>
-                          setState(() => selectedCategories.remove(c)),
-                    ))
-                .toList(),
+          DateFormField(
+            initialValue: dateTime,
+            labelText: AppLocalizations.of(context).dateLabel,
+            firstDate: (date) => date.subtract(Duration(days: 365)),
+            lastDate: (_) => DateTime.now(),
+            onSaved: (newValue) => dateTime = newValue,
           ),
           TextFormField(
-            controller: _dateController,
             decoration: InputDecoration(
-              labelText: Loc.of(context).dateLabel,
-              suffixIcon: IconButton(
-                icon: Icon(Icons.calendar_today),
-                onPressed: _onPickDate,
-              ),
-            ),
-            keyboardType: TextInputType.datetime,
-            inputFormatters: <TextInputFormatter>[
-              WhitelistingTextInputFormatter(RegExp('[0-9/]')),
-            ],
-            validator: (value) {
-              try {
-                _dateFormatter.parseLoose(value);
-                return null;
-              } catch (FormatException) {
-                return Loc.of(context).dateError;
-              }
-            },
-            onChanged: (value) {
-              try {
-                dateTime = _dateFormatter.parseLoose(value);
-                return null;
-              } catch (FormatException) {}
-            },
+                labelText: AppLocalizations.of(context).notesLabel),
+            validator: (value) => (toReturn && (value == null || value.isEmpty))
+                ? AppLocalizations.of(context).noteError
+                : null,
+            onSaved: (newValue) => notes = newValue,
           ),
-          TextFormField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                labelText: Loc.of(context).notesLabel,
-              ),
-              validator: (value) =>
-                  (toReturn && (value == null || value.isEmpty))
-                      ? Loc.of(context).noteError
-                      : null),
           SwitchListTile(
-            title: Text(Loc.of(context).toReturnLabel),
+            title: Text(AppLocalizations.of(context).toReturnLabel),
             value: toReturn,
             onChanged: (value) => setState(() => toReturn = !toReturn),
           ),
           DropdownButtonFormField(
-            decoration: InputDecoration(
-              labelText: Loc.of(context).returningLabel,
-            ),
-            items: widget.toReturn.map((c) {
+            items: widget.availableToReturn.map((c) {
               return DropdownMenuItem(
                 value: c,
                 child: Text(c.notes),
               );
             }).toList(),
-            onChanged: (value) => setState(() => returning = value),
+            decoration: InputDecoration(
+                labelText: AppLocalizations.of(context).returningLabel),
+            onChanged: (value) => null,
+            onSaved: (newValue) => returning = newValue,
           ),
           RaisedButton(
             onPressed: _onSubmit,
-            child: Text(
-              Loc.of(context).submitLabel.toUpperCase(),
-            ),
+            child: Text(AppLocalizations.of(context).submitLabel.toUpperCase()),
           ),
         ],
       ),
     );
   }
 
-  @override
-  void dispose() {
-    _amountController.dispose();
-    _dateController.dispose();
-    _notesController.dispose();
-    _formKey.currentState.dispose();
-    super.dispose();
-  }
-
   void _onSubmit() async {
     if (_formKey.currentState.validate()) {
-      Navigator.pop(
-        context,
-        Transaction.temporary(
-          amount: double.parse(_amountController.text),
-          originEntity: originEntity,
-          destinationEntity: destinationEntity,
-          categories: selectedCategories,
-          dateTime: dateTime,
-          notes: _notesController.text,
-          toReturn: toReturn,
-          returnId: returning,
-        ),
-      );
+      _formKey.currentState.save();
+      widget.onSubmit(Transaction.temporary(
+        amount: amount,
+        originEntity: originEntity,
+        destinationEntity: destinationEntity,
+        categories: selectedCategories,
+        dateTime: dateTime,
+        notes: notes,
+        toReturn: toReturn,
+        returnId: returning.id,
+      ));
     }
-  }
-
-  void _onAddCategory(Category category) async {
-    if (category == null) return;
-    if (selectedCategories.contains(category)) return;
-    setState(() {
-      selectedCategories.add(category);
-    });
-  }
-
-  void _onPickDate() async {
-    var date = await showDatePicker(
-        context: context,
-        initialDate: dateTime,
-        firstDate: DateTime.now().subtract(Duration(days: 365)),
-        lastDate: DateTime.now());
-    if (date == null) return;
-    dateTime = date;
-    setState(() => _dateController.text = _dateFormatter.format(date));
   }
 }
 
@@ -284,24 +209,17 @@ class DropdownAndChipsFormField<T> extends FormField<Set<T>> {
   DropdownAndChipsFormField({
     Key key,
     onSaved,
-    validator,
     initialValue,
-    autovalidate,
-    enabled,
-    crossAxisAlignment,
     labelText,
-    @required List<T> items,
+    @required Set<T> items,
     @required String Function(T) nameBuilder,
   }) : super(
           key: key,
           onSaved: onSaved,
-          validator: validator,
-          initialValue: initialValue ?? [],
-          autovalidate: autovalidate ?? false,
-          enabled: enabled ?? true,
+          initialValue: initialValue ?? {},
           builder: (FormFieldState<Set<T>> field) {
             return Column(
-              crossAxisAlignment: crossAxisAlignment,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 DropdownButtonFormField(
                   items: items.map((i) {
@@ -311,7 +229,7 @@ class DropdownAndChipsFormField<T> extends FormField<Set<T>> {
                     );
                   }).toList(),
                   decoration: InputDecoration(labelText: labelText),
-                  onChanged: (value) {
+                  onChanged: (value) async {
                     if (value == null) return;
                     field.value.add(value);
                   },
@@ -321,7 +239,11 @@ class DropdownAndChipsFormField<T> extends FormField<Set<T>> {
                   children: field.value.map((i) {
                     return Chip(
                       label: Text(nameBuilder(i)),
-                      onDeleted: () => field.value.remove(i),
+                      onDeleted: () async {
+                        var newValue = field.value;
+                        newValue.remove(i);
+                        field.didChange(newValue);
+                      },
                     );
                   }).toList(),
                 ),
@@ -329,4 +251,73 @@ class DropdownAndChipsFormField<T> extends FormField<Set<T>> {
             );
           },
         );
+}
+
+/// A [FormField] that looks like a [TextFormField] and contains a [DateTime].
+///
+/// The field is not editable. The user is can use showDatePicker.
+/// The date can be between the [firstDate] and [lastDate] based on the current
+/// chosen date.
+class DateFormField extends FormField<DateTime> {
+  DateFormField({
+    Key key,
+    onSaved,
+    @required initialValue,
+    @required labelText,
+    @required DateTime Function(DateTime) firstDate,
+    @required DateTime Function(DateTime) lastDate,
+  }) : super(
+          key: key,
+          onSaved: onSaved,
+          initialValue: initialValue,
+          autovalidate: true,
+          builder: (FormFieldState<DateTime> field) {
+            return TextFormField(
+              controller: TextEditingController(
+                text: _dateFormatter.format(field.value),
+              ),
+              readOnly: true,
+              keyboardType: TextInputType.datetime,
+              onTap: () async {
+                var date = await showDatePicker(
+                  context: field.context,
+                  initialDate: field.value,
+                  firstDate: firstDate(field.value),
+                  lastDate: lastDate(field.value),
+                );
+                if (date == null) return;
+                field.didChange(date);
+              },
+              decoration: InputDecoration(
+                labelText: labelText,
+                suffixIcon: Icon(Icons.calendar_today),
+              ),
+            );
+          },
+        );
+}
+
+class TransactionDetails extends StatelessWidget {
+  final Transaction transaction;
+
+  TransactionDetails({
+    Key key,
+    this.transaction,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ListTile(
+            title: Text(transaction.amount.toString()),
+            subtitle: Text(_dateFormatter.format(transaction.dateTime)),
+          ),
+        ],
+      ),
+    );
+  }
 }

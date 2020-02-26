@@ -5,21 +5,21 @@ import 'package:intl/intl.dart';
 
 import 'messages_all.dart';
 
-class Loc {
+class AppLocalizations {
   final String localeName;
 
-  const Loc(this.localeName);
+  const AppLocalizations(this.localeName);
 
-  static Future<Loc> load(Locale locale) {
+  static Future<AppLocalizations> load(Locale locale) {
     final String name =
         locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
     final String localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName)
-        .then((_) => Loc(localeName));
+        .then((_) => AppLocalizations(localeName));
   }
 
-  static Loc of(BuildContext context) =>
-      Localizations.of<Loc>(context, Loc);
+  static AppLocalizations of(BuildContext context) =>
+      Localizations.of<AppLocalizations>(context, AppLocalizations);
 
   String get homeTitle {
     return Intl.message(
@@ -141,10 +141,18 @@ class Loc {
     );
   }
 
-  String get dateError {
+  String get dateFormatError {
     return Intl.message(
       'Insert a valid date: dd/MM/yyyy',
       desc: 'Specifies that the input must be a date in the form dd/MM/yyyy',
+      locale: localeName,
+    );
+  }
+
+  String get dateRangeError {
+    return Intl.message(
+      'The date is not in the allowed range',
+      desc: 'Specifies that the inserted date is not in the allowed range',
       locale: localeName,
     );
   }
@@ -164,21 +172,17 @@ class Loc {
       locale: localeName,
     );
   }
-
-
-
-
 }
 
-class AppLocalizationsDelegate extends LocalizationsDelegate<Loc> {
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override
   bool isSupported(Locale locale) => ['en'].contains(locale.languageCode);
 
   @override
-  Future<Loc> load(Locale locale) {
-    return Future.value(Loc('en'));
+  Future<AppLocalizations> load(Locale locale) {
+    return Future.value(AppLocalizations('en'));
     //return AppLocalizations.load(locale);
   }
 
