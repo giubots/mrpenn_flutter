@@ -39,3 +39,4 @@ roadmap:
 	initial mock backend
 	frontend (update backend specifications when necessary)
 	backend (google drive?) and serialization (db? vs text)
+	UI (details)

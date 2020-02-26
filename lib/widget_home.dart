@@ -3,8 +3,6 @@ import 'package:mrpenn_flutter/handler_serialization.dart';
 import 'package:mrpenn_flutter/localization/localization.dart';
 import 'package:mrpenn_flutter/widget_newdata.dart';
 
-import 'model.dart';
-
 class Home extends StatefulWidget {
   final newDataRouteName;
 
@@ -42,10 +40,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         children: <Widget>[
           Test(), //TODO
           ListView(
-              children: DataInterface()
-                  .temp()
-                  .map((e) => TransactionDetails(transaction: e))
-                  .toList()), //TODO
+            children: [
+              TransactionDetails(transaction: DataInterface().temp()[0])
+            ],
+          ) //TODO
         ],
       ),
       floatingActionButton: FloatingActionButton(onPressed: _onFABPressed),
@@ -70,5 +68,3 @@ class Test extends StatelessWidget {
     );
   }
 }
-
-

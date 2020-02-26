@@ -65,6 +65,7 @@ class TransactionForm extends StatefulWidget {
   final Set<Entity> availableEntities;
   final Set<Transaction> availableToReturn;
   final void Function(Transaction) onSubmit;
+  final Transaction initialValues;
 
   TransactionForm({
     Key key,
@@ -72,6 +73,7 @@ class TransactionForm extends StatefulWidget {
     @required this.availableEntities,
     @required this.availableToReturn,
     @required this.onSubmit,
+    this.initialValues,
   }) : super(key: key);
 
   @override
@@ -83,14 +85,33 @@ class _TransactionFormState extends State<TransactionForm> {
       value == null ? AppLocalizations.of(context).emptyFieldError : null;
   final _formKey = GlobalKey<FormState>();
 
-  double amount;
-  Entity originEntity;
-  Entity destinationEntity;
-  Set<Category> selectedCategories = {};
-  DateTime dateTime = DateTime.now();
-  String notes;
-  bool toReturn = false;
-  Transaction returning;
+  double _amount;
+  Entity _originEntity;
+  Entity _destinationEntity;
+  Set<Category> _selectedCategories;
+  DateTime _dateTime;
+  String _notes;
+  bool _toReturn;
+  int _returning;
+
+  @override
+  void initState() {
+    super.initState();
+    _amount = widget?.initialValues?.amount;
+    _originEntity = widget?.initialValues?.originEntity;
+    _destinationEntity = widget?.initialValues?.destinationEntity;
+    _selectedCategories = widget?.initialValues?.categories ?? {};
+    _dateTime = widget?.initialValues?.dateTime ?? DateTime.now();
+    _notes = widget?.initialValues?.notes;
+    _toReturn = widget?.initialValues?.toReturn ?? false;
+    _returning = widget?.initialValues?.returnId;
+
+    if (_originEntity != null) widget.availableEntities.add(_originEntity);
+    if (_destinationEntity != null)
+      widget.availableEntities.add(_destinationEntity);
+    widget.availableCategories.addAll(_selectedCategories);
+    if (_returning != null) widget.availableToReturn.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,6 +129,7 @@ class _TransactionFormState extends State<TransactionForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           TextFormField(
+            initialValue: _amount?.toString(),
             keyboardType: TextInputType.number,
             inputFormatters: [WhitelistingTextInputFormatter(RegExp('[0-9.]'))],
             decoration: InputDecoration(
@@ -115,61 +137,67 @@ class _TransactionFormState extends State<TransactionForm> {
             validator: (value) => (double.tryParse(value) ?? -1) < 0
                 ? AppLocalizations.of(context).amountError
                 : null,
-            onSaved: (newValue) => amount = double.parse(newValue),
+            onSaved: (newValue) => _amount = double.parse(newValue),
           ),
           DropdownButtonFormField(
+            value: _originEntity,
             items: entityButtons,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).originLabel),
             validator: (value) => _notEmptyValidator(context, value),
             onChanged: (value) => null,
-            onSaved: (newValue) => originEntity = newValue,
+            onSaved: (newValue) => _originEntity = newValue,
           ),
           DropdownButtonFormField(
+            value: _destinationEntity,
             items: entityButtons,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).destinationLabel),
             validator: (value) => _notEmptyValidator(context, value),
             onChanged: (value) => null,
-            onSaved: (newValue) => destinationEntity = newValue,
+            onSaved: (newValue) => _destinationEntity = newValue,
           ),
           DropdownAndChipsFormField<Category>(
+            initialValue: _selectedCategories,
             nameBuilder: (c) => c.name,
             labelText: AppLocalizations.of(context).categoryLabel,
             items: widget.availableCategories,
-            onSaved: (newValue) => selectedCategories = newValue,
+            onSaved: (newValue) => _selectedCategories = newValue,
           ),
           DateFormField(
-            initialValue: dateTime,
+            initialValue: _dateTime,
             labelText: AppLocalizations.of(context).dateLabel,
             firstDate: (date) => date.subtract(Duration(days: 365)),
             lastDate: (_) => DateTime.now(),
-            onSaved: (newValue) => dateTime = newValue,
+            onSaved: (newValue) => _dateTime = newValue,
           ),
           TextFormField(
+            initialValue: _notes,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).notesLabel),
-            validator: (value) => (toReturn && (value == null || value.isEmpty))
-                ? AppLocalizations.of(context).noteError
-                : null,
-            onSaved: (newValue) => notes = newValue,
+            validator: (value) =>
+                (_toReturn && (value == null || value.isEmpty))
+                    ? AppLocalizations.of(context).noteError
+                    : null,
+            onSaved: (newValue) => _notes = newValue,
           ),
           SwitchListTile(
+            value: _toReturn,
             title: Text(AppLocalizations.of(context).toReturnLabel),
-            value: toReturn,
-            onChanged: (value) => setState(() => toReturn = !toReturn),
+            onChanged: (value) => setState(() => _toReturn = !_toReturn),
           ),
           DropdownButtonFormField(
+            value: _returning,
             items: widget.availableToReturn.map((c) {
               return DropdownMenuItem(
-                value: c,
+                value: c.id,
                 child: Text(c.notes),
               );
             }).toList(),
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).returningLabel),
             onChanged: (value) => null,
-            onSaved: (newValue) => returning = newValue,
+            onSaved: (newValue) => _returning = newValue,
           ),
           RaisedButton(
             onPressed: _onSubmit,
@@ -184,14 +212,14 @@ class _TransactionFormState extends State<TransactionForm> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       widget.onSubmit(Transaction.temporary(
-        amount: amount,
-        originEntity: originEntity,
-        destinationEntity: destinationEntity,
-        categories: selectedCategories,
-        dateTime: dateTime,
-        notes: notes,
-        toReturn: toReturn,
-        returnId: returning.id,
+        amount: _amount,
+        originEntity: _originEntity,
+        destinationEntity: _destinationEntity,
+        categories: _selectedCategories,
+        dateTime: _dateTime,
+        notes: _notes,
+        toReturn: _toReturn,
+        returnId: _returning,
       ));
     }
   }
@@ -308,16 +336,150 @@ class TransactionDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          ListTile(
-            title: Text(transaction.amount.toString()),
-            subtitle: Text(_dateFormatter.format(transaction.dateTime)),
+      child: InkWell(//TODO
+        onTap: () => _onReturnedPressed(context),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Flexible(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          transaction.amount.toString() + '€',
+                          style: TextStyle(
+                            inherit: true,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 50,
+                          ),
+                        ),
+                        Text(
+                          _dateFormatter.format(transaction.dateTime),
+                          style: TextStyle(
+                            inherit: true,
+                            fontWeight: FontWeight.w300,
+                            fontSize: 20,
+                          ),
+                        ),
+                        Text(
+                          transaction.notes,
+                          style: TextStyle(
+                            inherit: true,
+                            fontWeight: FontWeight.w300,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          Icon(Icons.blur_circular),
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text(
+                            transaction.originEntity.name,
+                            style: TextStyle(
+                              inherit: true,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: <Widget>[
+                          Icon(Icons.forward),
+                          Padding(padding: EdgeInsets.all(2)),
+                          Text(
+                            transaction.destinationEntity.name,
+                            style: TextStyle(
+                              inherit: true,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Visibility(
+                        visible: transaction.toReturn,
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.assignment_return),
+                            Padding(padding: EdgeInsets.all(2)),
+                            Text(
+                              AppLocalizations.of(context).toReturnShortLabel,
+                              style: TextStyle(
+                                inherit: true,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Visibility(
+                        visible: transaction.wasReturned,
+                        child: OutlineButton(
+                          onPressed: () => _onReturnedPressed(context),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(Icons.done),
+                              Padding(padding: EdgeInsets.all(2)),
+                              Text(
+                                AppLocalizations.of(context).returnedShortLabel,
+                                style: TextStyle(
+                                  inherit: true,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Divider(),
+              Text(AppLocalizations.of(context).categoryLabel),
+              Wrap(
+                spacing: 4.0,
+                children: transaction.categories.map((i) {
+                  return Chip(label: Text(i.name));
+                }).toList(),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void _onReturnedPressed(BuildContext context) async {
+    var categories = await DataInterface().getActiveCategories();
+    var entities = await DataInterface().getActiveEntities();
+    var toReturn = await DataInterface().getToReturn();
+
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => Scaffold(
+        body: TransactionForm(
+          availableCategories: categories,
+          availableEntities: entities,
+          availableToReturn: toReturn,
+          initialValues: transaction,
+          onSubmit: (transaction) => Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => Scaffold(
+                body: TransactionDetails(transaction: transaction)
+              )
+          )),
+        ),
+      )
+    ));
   }
 }

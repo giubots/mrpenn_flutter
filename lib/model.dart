@@ -26,7 +26,7 @@ class Transaction {
   /// Some notes on the transaction.
   final String notes;
 
-  /// If the transaction had to be returned and was, this is the returning transaction. Defaults to -1.
+  /// If the transaction had to be returned and was, this is the returning transaction.
   final int returnId;
 
   /// Construct a complete transaction.
@@ -39,11 +39,10 @@ class Transaction {
     this.toReturn = false,
     DateTime dateTime,
     this.notes = '',
-    this.returnId = -1,
+    this.returnId,
   })  : dateTime = dateTime ?? DateTime.now(),
         categories = categories ?? {},
-        assert(amount >= 0),
-        assert(id != returnId);
+        assert(amount >= 0);
 
   /// A transaction when it has not an id number yet.
   Transaction.temporary({
@@ -66,6 +65,11 @@ class Transaction {
           notes: notes,
           returnId: returnId,
         );
+
+  /// Returns true if this was toReturn and was returned.
+  bool get wasReturned {
+    return toReturn && returnId != null;
+  }
 }
 
 /// A component that can be used in the transactions.

@@ -35,6 +35,7 @@ class _MockData implements DataInterface {
       toReturn: true,
       notes: 'abc',
       dateTime: DateTime.now().subtract(Duration(days: 2)),
+      categories: categories.toSet(),
     ),
     Transaction(
       amount: 20,

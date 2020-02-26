@@ -111,8 +111,15 @@ class AppLocalizations {
 
   String get toReturnLabel {
     return Intl.message(
-      'Must be returned:',
+      'Must be returned',
       desc: 'Label for a switch, whether the transaction must be returned',
+      locale: localeName,
+    );
+
+  }  String get toReturnShortLabel {
+    return Intl.message(
+      'To return',
+      desc: 'Label indicating whether the transaction must be returned in few words',
       locale: localeName,
     );
   }
@@ -121,6 +128,14 @@ class AppLocalizations {
     return Intl.message(
       'Returning transaction',
       desc: 'Label for the field that contains the transaction to be returned',
+      locale: localeName,
+    );
+  }
+
+  String get returnedShortLabel {
+    return Intl.message(
+      'Returned',
+      desc: 'Label that indicates that the transaction was returned',
       locale: localeName,
     );
   }
