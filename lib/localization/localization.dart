@@ -53,6 +53,14 @@ class AppLocalizations {
     );
   }
 
+  String get titleLabel {
+    return Intl.message(
+      'Title',
+      desc: 'Label for the field containing the title, name of the transaction',
+      locale: localeName,
+    );
+  }
+
   String get amountLabel {
     return Intl.message(
       'Amount',
@@ -115,11 +123,13 @@ class AppLocalizations {
       desc: 'Label for a switch, whether the transaction must be returned',
       locale: localeName,
     );
+  }
 
-  }  String get toReturnShortLabel {
+  String get toReturnShortLabel {
     return Intl.message(
       'To return',
-      desc: 'Label indicating whether the transaction must be returned in few words',
+      desc:
+          'Label indicating whether the transaction must be returned in few words',
       locale: localeName,
     );
   }

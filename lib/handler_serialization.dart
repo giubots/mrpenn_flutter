@@ -6,13 +6,23 @@ abstract class DataInterface {
     return _MockData();
   }
 
+  /// Returns the entities that can be used to create a new Transaction.
   Future<Set<Entity>> getActiveEntities();
 
+  /// Returns the categories that can be used to create a new Transaction.
   Future<Set<Category>> getActiveCategories();
 
-  Future<Set<Transaction>> getToReturn();
+  /// Returns all the transactions.
+  List<Transaction> getTransactions();
 
-  List<Transaction> temp();
+  /// Adds a transaction, also sets its id.
+  void addTransaction(Transaction toAdd);
+
+  /// Removes a transaction.
+  void removeTransaction(Transaction toRemove);
+
+  /// Updates a transaction.
+  void updateTransaction({Transaction old, Transaction newTransaction});
 }
 
 class _MockData implements DataInterface {
@@ -28,23 +38,35 @@ class _MockData implements DataInterface {
   ];
   static var transactions = [
     Transaction(
+      title: 'good',
       amount: 10,
       originEntity: entities[0],
       destinationEntity: entities[1],
       id: 10,
       toReturn: true,
-      notes: 'abc',
       dateTime: DateTime.now().subtract(Duration(days: 2)),
       categories: categories.toSet(),
     ),
     Transaction(
-      amount: 20,
+      title: 'expensive',
+      amount: 20.9,
       originEntity: entities[1],
       destinationEntity: entities[2],
-      id: 30,
+      id: 20,
       toReturn: true,
       notes: 'def',
       dateTime: DateTime.now(),
+      returnId: 2,
+    ),
+    Transaction(
+      title: 'magnificent',
+      amount: 1000.32,
+      originEntity: entities[0],
+      destinationEntity: entities[2],
+      id: 30,
+      notes: 'Hello world!',
+      dateTime: DateTime.now(),
+      categories: categories.toSet(),
     ),
   ];
 
@@ -57,12 +79,26 @@ class _MockData implements DataInterface {
       Future.delayed(Duration(seconds: 3), () => categories.toSet());
 
   @override
-  Future<Set<Transaction>> getToReturn() => Future.delayed(
-      Duration(seconds: 3),
-      () => transactions.where((element) => element.toReturn).toSet());
+  List<Transaction> getTransactions() => transactions;
 
   @override
-  List<Transaction> temp() => transactions;
+  void addTransaction(Transaction toAdd) {
+    assert(toAdd != null);
+    transactions.add(Transaction.setId(toAdd, -1));
+  }
+
+  @override
+  void removeTransaction(Transaction toRemove) {
+    assert(toRemove != null);
+    transactions.remove(toRemove);
+  }
+
+  @override
+  void updateTransaction({Transaction old, Transaction newTransaction}) {
+    assert(old != null && newTransaction != null);
+    transactions.remove(old);
+    transactions.add(newTransaction);
+  }
 }
 
 /// A collection of transactions with some data associated with it.

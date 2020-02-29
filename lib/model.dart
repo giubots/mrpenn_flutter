@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 /// A transaction of money from a origin to a destination.
 class Transaction {
+  /// The title that identifies this.
+  final String title;
+
   /// The id of the transaction.
   final int id;
 
@@ -31,6 +34,7 @@ class Transaction {
 
   /// Construct a complete transaction.
   Transaction({
+    @required this.title,
     @required this.id,
     @required this.amount,
     @required this.originEntity,
@@ -42,10 +46,16 @@ class Transaction {
     this.returnId,
   })  : dateTime = dateTime ?? DateTime.now(),
         categories = categories ?? {},
-        assert(amount >= 0);
+        assert(title != null && title.isNotEmpty),
+        assert(id != null),
+        assert(amount != null && amount >= 0),
+        assert(originEntity != null),
+        assert(destinationEntity != null),
+        assert(toReturn || returnId == null);
 
   /// A transaction when it has not an id number yet.
-  Transaction.temporary({
+  Transaction.fromScratch({
+    @required title,
     @required amount,
     @required originEntity,
     @required destinationEntity,
@@ -55,6 +65,7 @@ class Transaction {
     notes,
     returnId,
   }) : this(
+          title: title,
           id: -1,
           amount: amount,
           originEntity: originEntity,
@@ -64,6 +75,49 @@ class Transaction {
           dateTime: dateTime,
           notes: notes,
           returnId: returnId,
+        );
+
+  /// Creates a transaction identical but with the new id.
+  Transaction.setId(
+    Transaction transaction,
+    int id,
+  ) : this(
+          title: transaction.title,
+          id: id,
+          amount: transaction.amount,
+          originEntity: transaction.originEntity,
+          destinationEntity: transaction.destinationEntity,
+          categories: transaction.categories,
+          toReturn: transaction.toReturn,
+          dateTime: transaction.dateTime,
+          notes: transaction.notes,
+          returnId: transaction.returnId,
+        );
+
+  /// Clones a transaction, fields can be changed.
+  Transaction.from(
+    Transaction toCopy, {
+    title,
+    id,
+    amount,
+    originEntity,
+    destinationEntity,
+    categories,
+    toReturn,
+    DateTime dateTime,
+    notes,
+    returnId,
+  }) : this(
+          title: title ?? toCopy.title,
+          id: id ?? toCopy.id,
+          amount: amount ?? toCopy.amount,
+          originEntity: originEntity ?? toCopy.originEntity,
+          destinationEntity: destinationEntity ?? toCopy.destinationEntity,
+          categories: categories ?? toCopy.categories,
+          toReturn: toReturn ?? toCopy.toReturn,
+          dateTime: dateTime ?? toCopy.dateTime,
+          notes: notes ?? toCopy.notes,
+          returnId: returnId ?? toCopy.returnId,
         );
 
   /// Returns true if this was toReturn and was returned.

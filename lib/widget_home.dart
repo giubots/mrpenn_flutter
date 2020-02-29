@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mrpenn_flutter/handler_serialization.dart';
-import 'package:mrpenn_flutter/localization/localization.dart';
-import 'package:mrpenn_flutter/widget_newdata.dart';
+
+import 'handler_serialization.dart';
+import 'localization/localization.dart';
+import 'widget_transactions.dart';
 
 class Home extends StatefulWidget {
-  final newDataRouteName;
-
-  const Home({Key key, @required this.newDataRouteName}) : super(key: key);
+  const Home({Key key}) : super(key: key);
 
   @override
   _HomeState createState() => _HomeState();
@@ -23,32 +22,31 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context).homeTitle),
-        bottom: TabBar(
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context).homeTitle),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: <Tab>[
+              Tab(text: AppLocalizations.of(context).hudTitle.toUpperCase()),
+              Tab(text: AppLocalizations.of(context).seeAllTitle.toUpperCase()),
+            ],
+          ),
+        ),
+        //TODO: use Streams
+        body: TabBarView(
           controller: _tabController,
-          tabs: <Tab>[
-            Tab(text: AppLocalizations.of(context).hudTitle.toUpperCase()),
-            Tab(text: AppLocalizations.of(context).seeAllTitle.toUpperCase()),
+          children: <Widget>[
+            Container(
+              child: Text('hi'),
+            ),
+            TransactionList(
+              elements: DataInterface().getTransactions(),
+            )
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: <Widget>[
-          Test(), //TODO
-          ListView(
-            children: [
-              TransactionDetails(transaction: DataInterface().temp()[0])
-            ],
-          ) //TODO
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(onPressed: _onFABPressed),
-    );
-  }
+        floatingActionButton: FloatingActionButton(onPressed: _onFABPressed),
+      );
 
   @override
   void dispose() {
@@ -56,15 +54,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  void _onFABPressed() => Navigator.pushNamed(
-      context, widget.newDataRouteName); //TODO full screen dialog?
-}
-
-class Test extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text('hi'),
+  void _onFABPressed() async {
+    var created = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (BuildContext context) => NewData(),
+        fullscreenDialog: true,
+      ),
     );
+    if (created != null) DataInterface().addTransaction(created);
   }
 }

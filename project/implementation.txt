@@ -34,9 +34,9 @@ statistics:
 	request the data, show it.
 
 
-roadmap:
-	model
-	initial mock backend
+road map:
 	frontend (update backend specifications when necessary)
+        settings
+        statistics
 	backend (google drive?) and serialization (db? vs text)
 	UI (details)

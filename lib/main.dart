@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:mrpenn_flutter/localization/localization.dart';
-import 'package:mrpenn_flutter/widget_home.dart';
-import 'package:mrpenn_flutter/widget_newdata.dart';
+
+import 'localization/localization.dart';
+import 'widget_home.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,23 +11,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mr Penn',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData.light(),
       initialRoute: '/',
       routes: {
-        '/': (context) => Home(newDataRouteName: '/newData'),
-        '/newData': (context) => NewData(),
+        '/': (context) => Home(),
       },
       localizationsDelegates: [
         AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
-        //GlobalCupertinoLocalizations.delegate,
+        //GlobalCupertinoLocalizations.delegate,//FIXME iOS
       ],
       supportedLocales: [
-        const Locale('en'), // English
-        const Locale('it'), // Hebrew
+        const Locale('en'),
+        //const Locale('it'),//TODO translation
       ],
     );
   }
