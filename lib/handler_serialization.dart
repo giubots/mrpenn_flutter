@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'model.dart';
 
 /// This represents an object that can provide the app data to the front end.
@@ -12,20 +14,28 @@ abstract class DataInterface {
   /// Returns the categories that can be used to create a new Transaction.
   Future<Set<Category>> getActiveCategories();
 
-  /// Returns all the transactions.
-  List<Transaction> getTransactions();
+  /// Returns a stream with the transaction snapshots.
+  Stream<List<Transaction>> getStream();
 
   /// Adds a transaction, also sets its id.
   void addTransaction(Transaction toAdd);
 
-  /// Removes a transaction.
+  /// Removes a transaction. Also removes it when it is referenced.
   void removeTransaction(Transaction toRemove);
 
-  /// Updates a transaction.
+  /// Updates a transaction and where it is referenced.
   void updateTransaction({Transaction old, Transaction newTransaction});
+
+  /// Disposes of the resources associated with this.
+  void dispose();
 }
 
 class _MockData implements DataInterface {
+  static final _streamController =
+      StreamController<List<Transaction>>.broadcast(
+    onListen: () => _streamController.sink.add(transactions),
+  );
+
   static var entities = [
     Entity(name: "Alice"),
     Entity(name: "Bob"),
@@ -56,7 +66,7 @@ class _MockData implements DataInterface {
       toReturn: true,
       notes: 'def',
       dateTime: DateTime.now(),
-      returnId: 2,
+      returnId: 30,
     ),
     Transaction(
       title: 'magnificent',
@@ -79,18 +89,17 @@ class _MockData implements DataInterface {
       Future.delayed(Duration(seconds: 3), () => categories.toSet());
 
   @override
-  List<Transaction> getTransactions() => transactions;
-
-  @override
   void addTransaction(Transaction toAdd) {
     assert(toAdd != null);
     transactions.add(Transaction.setId(toAdd, -1));
+    _streamController.sink.add(transactions);
   }
 
   @override
   void removeTransaction(Transaction toRemove) {
     assert(toRemove != null);
     transactions.remove(toRemove);
+    _streamController.sink.add(transactions);
   }
 
   @override
@@ -98,6 +107,16 @@ class _MockData implements DataInterface {
     assert(old != null && newTransaction != null);
     transactions.remove(old);
     transactions.add(newTransaction);
+    _streamController.sink.add(transactions);
+  }
+
+  @override
+  Stream<List<Transaction>> getStream() => _streamController.stream;
+
+  @override
+  void dispose() {
+    _streamController.sink.close();
+    _streamController.close();
   }
 }
 

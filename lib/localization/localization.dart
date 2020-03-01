@@ -21,6 +21,36 @@ class AppLocalizations {
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations);
 
+  String get confirmationTitle {
+    return Intl.message(
+      'Are you sure?',
+      desc: 'Title for the message dialog that asks confirmation',
+      locale: localeName,
+    );
+  }
+
+  String get deleteMessage {
+    return Intl.message(
+      'The selected transaction will be deleted, this action can not be undone.',
+      desc: 'Message informing that the selected transaction will be deleted',
+      locale: localeName,
+    );
+  }
+
+  String get confirmLabel {
+    return Intl.message(
+      'Yes',
+      desc: 'Label for a button that allows to confirm the action',
+      locale: localeName,
+    );
+  }
+  String get abortLabel {
+    return Intl.message(
+      'No',
+      desc: 'Label for a button that allows to abort the action',
+      locale: localeName,
+    );
+  }
   String get homeTitle {
     return Intl.message(
       'MrPenn',
@@ -194,6 +224,14 @@ class AppLocalizations {
     return Intl.message(
       'Please choose a value',
       desc: 'Specifies that a value must be selected amongs the provided',
+      locale: localeName,
+    );
+  }
+
+  String get notFoundError {
+    return Intl.message(
+      'Transaction not found',
+      desc: 'Specifies that the required transaction was not found',
       locale: localeName,
     );
   }

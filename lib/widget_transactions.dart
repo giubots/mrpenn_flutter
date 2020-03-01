@@ -1,10 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
-import 'handler_serialization.dart';
 import 'localization/localization.dart';
 import 'model.dart';
 
@@ -27,13 +24,15 @@ const IconData _lookIcon = Icons.search;
 /// Start loading the data and then shows a [_TransactionForm].
 /// When done returns the inserted Transaction.
 class NewData extends StatelessWidget {
-  final _dataHolder = Future.wait([
-    DataInterface().getActiveEntities(),
-    DataInterface().getActiveCategories(),
-  ]);
+  final dataHolder;
   final _validationKey = GlobalKey<_TransactionFormState>();
+  final Transaction initialValues;
 
-  NewData({Key key}) : super(key: key);
+  NewData({
+    Key key,
+    @required this.dataHolder,
+    this.initialValues,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -49,7 +48,7 @@ class NewData extends StatelessWidget {
           ],
         ),
         body: FutureBuilder<List<Set>>(
-          future: _dataHolder,
+          future: dataHolder,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return SingleChildScrollView(
@@ -58,6 +57,7 @@ class NewData extends StatelessWidget {
                   key: _validationKey,
                   availableEntities: snapshot.data[0],
                   availableCategories: snapshot.data[1],
+                  initialValues: initialValues,
                   onSubmit: (transaction) =>
                       Navigator.pop(context, transaction),
                 ),
@@ -522,8 +522,17 @@ class _DetailsCard extends StatelessWidget {
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> elements;
+  final void Function(Transaction toDelete) onDelete;
+  final void Function(Transaction toModify) onModify;
+  final void Function(Transaction toReturn) onReturn;
 
-  const TransactionList({Key key, @required this.elements}) : super(key: key);
+  const TransactionList({
+    Key key,
+    @required this.elements,
+    @required this.onDelete,
+    @required this.onModify,
+    @required this.onReturn,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -545,17 +554,32 @@ class TransactionList extends StatelessWidget {
         title: Text(elements[index].title),
         subtitle: Text(_dateFormatter.format(elements[index].dateTime)),
         trailing: Visibility(
-          visible: !elements[index].wasReturned,
+          visible: elements[index].toReturn && !elements[index].wasReturned,
           child: const Icon(_notReturnedIcon),
         ),
-        onTap: () async => showDialog(
-          context: context,
-          builder: (context) => _CustomDialog(
-            child: _DetailsCard(transaction: elements[index]),
-          ),
-        ),
+        onTap: () => _onTap(context, elements[index]),
       ),
       separatorBuilder: (context, index) => const Divider(),
+    );
+  }
+
+  void _onTap(BuildContext context, Transaction transaction) async {
+    showDialog(
+      context: context,
+      builder: (context) => _CustomDialog(
+        child: _DetailsCard(
+          transaction: transaction,
+          onDelete: () async => onDelete(transaction),
+          onModify: () async => onModify(transaction),
+          onReturn: () async => onReturn(transaction),
+          onFind: (elements.any((e) => e.id == transaction.returnId))
+              ? () async => _onTap(
+                    context,
+                    elements.firstWhere((e) => e.id == transaction.returnId),
+                  )
+              : null,
+        ),
+      ),
     );
   }
 }
