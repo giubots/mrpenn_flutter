@@ -44,6 +44,7 @@ class AppLocalizations {
       locale: localeName,
     );
   }
+
   String get abortLabel {
     return Intl.message(
       'No',
@@ -51,6 +52,7 @@ class AppLocalizations {
       locale: localeName,
     );
   }
+
   String get homeTitle {
     return Intl.message(
       'MrPenn',

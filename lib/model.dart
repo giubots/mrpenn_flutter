@@ -1,7 +1,15 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'model.g.dart';
 
 /// A transaction of money from a origin to a destination.
+@JsonSerializable(explicitToJson: true)
 class Transaction {
+  //TODO: make partial transaction superclass of this
+  static final int _defaultId = -1;
+
   /// The title that identifies this.
   final String title;
 
@@ -66,7 +74,7 @@ class Transaction {
     returnId,
   }) : this(
           title: title,
-          id: -1,
+          id: _defaultId,
           amount: amount,
           originEntity: originEntity,
           destinationEntity: destinationEntity,
@@ -120,14 +128,49 @@ class Transaction {
           returnId: returnId ?? toCopy.returnId,
         );
 
+  factory Transaction.fromJson(Map<String, dynamic> json) =>
+      _$TransactionFromJson(json);
+
   /// Returns true if this was toReturn and was returned.
   bool get wasReturned {
     return toReturn && returnId != null;
   }
+
+  Map<String, dynamic> toJson() => _$TransactionToJson(this);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Transaction &&
+          runtimeType == other.runtimeType &&
+          title == other.title &&
+          id == other.id &&
+          amount == other.amount &&
+          originEntity == other.originEntity &&
+          destinationEntity == other.destinationEntity &&
+          SetEquality().equals(categories, other.categories) &&
+          toReturn == other.toReturn &&
+          dateTime == other.dateTime &&
+          notes == other.notes &&
+          returnId == other.returnId;
+
+  @override
+  int get hashCode =>
+      title.hashCode ^
+      id.hashCode ^
+      amount.hashCode ^
+      originEntity.hashCode ^
+      destinationEntity.hashCode ^
+      categories.hashCode ^
+      toReturn.hashCode ^
+      dateTime.hashCode ^
+      notes.hashCode ^
+      returnId.hashCode;
 }
 
-/// A component that can be used in the transactions.
-abstract class TransactionComponent {
+/// An entity can be a source or destination for transactions.
+@JsonSerializable()
+class Entity {
   /// The name of this.
   final String name;
 
@@ -137,15 +180,6 @@ abstract class TransactionComponent {
   /// Whether this is shown in the statistics. False by default.
   bool preferred;
 
-  TransactionComponent({
-    @required this.name,
-    this.active = true,
-    this.preferred = false,
-  });
-}
-
-/// An entity can be a source or destination for transactions.
-class Entity extends TransactionComponent {
   /// The initial value for this entity. Defaults to 0.
   double initialValue;
 
@@ -153,23 +187,87 @@ class Entity extends TransactionComponent {
   bool inTotal;
 
   Entity({
-    @required name,
-    active,
-    preferred,
+    @required this.name,
+    this.active,
+    this.preferred,
     this.initialValue = 0,
     this.inTotal = false,
-  }) : super(name: name, active: active, preferred: preferred);
+  });
+
+  factory Entity.fromJson(Map<String, dynamic> json) => _$EntityFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EntityToJson(this);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Entity &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          active == other.active &&
+          preferred == other.preferred &&
+          initialValue == other.initialValue &&
+          inTotal == other.inTotal;
+
+  @override
+  int get hashCode =>
+      name.hashCode ^
+      active.hashCode ^
+      preferred.hashCode ^
+      initialValue.hashCode ^
+      inTotal.hashCode;
 }
 
 /// A category for organizing the transactions.
-class Category extends TransactionComponent {
+@JsonSerializable()
+class Category {
+  /// The name of this.
+  final String name;
+
+  /// Whether this can be used to create a transaction. True by default.
+  bool active;
+
+  /// Whether this is shown in the statistics. False by default.
+  bool preferred;
+
   /// Whether this category has positive value (or negative). Defaults to true.
   bool positive;
 
   Category({
-    @required name,
-    active,
-    preferred,
+    @required this.name,
+    this.active,
+    this.preferred,
     this.positive = true,
-  }) : super(name: name, active: active, preferred: preferred);
+  });
+
+  factory Category.fromJson(Map<String, dynamic> json) =>
+      _$CategoryFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CategoryToJson(this);
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category &&
+          runtimeType == other.runtimeType &&
+          name == other.name &&
+          active == other.active &&
+          preferred == other.preferred &&
+          positive == other.positive;
+
+  @override
+  int get hashCode =>
+      name.hashCode ^ active.hashCode ^ preferred.hashCode ^ positive.hashCode;
+}
+
+@JsonSerializable(explicitToJson: true)
+class TransactionsList {
+  List<Transaction> transactions;
+
+  TransactionsList({this.transactions});
+
+  factory TransactionsList.fromJson(Map<String, dynamic> json) =>
+      _$TransactionListFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TransactionListToJson(this);
 }

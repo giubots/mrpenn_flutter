@@ -56,7 +56,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             )
           ],
         ),
-        floatingActionButton: FloatingActionButton(onPressed: _onNewData),
+        floatingActionButton: FloatingActionButton(
+          onPressed: _onNewData,
+          child: Icon(Icons.add),
+        ),
       );
 
   @override

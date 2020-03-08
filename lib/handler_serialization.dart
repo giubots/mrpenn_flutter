@@ -1,12 +1,13 @@
 import 'dart:async';
 
+import 'data_store.dart';
 import 'model.dart';
 
 /// This represents an object that can provide the app data to the front end.
 abstract class DataInterface {
-  factory DataInterface() {
-    return _MockData();
-  }
+  static DataInterface _instance = _MockData();
+
+  factory DataInterface() => _instance;
 
   /// Returns the entities that can be used to create a new Transaction.
   Future<Set<Entity>> getActiveEntities();
@@ -31,6 +32,7 @@ abstract class DataInterface {
 }
 
 class _MockData implements DataInterface {
+  DataStore store;
   static final _streamController =
       StreamController<List<Transaction>>.broadcast(
     onListen: () => _streamController.sink.add(transactions),
@@ -80,13 +82,15 @@ class _MockData implements DataInterface {
     ),
   ];
 
-  @override
-  Future<Set<Entity>> getActiveEntities() =>
-      Future.delayed(Duration(seconds: 3), () => entities.toSet());
+  _MockData() : store = DataStore();
 
   @override
-  Future<Set<Category>> getActiveCategories() =>
-      Future.delayed(Duration(seconds: 3), () => categories.toSet());
+  Future<Set<Entity>> getActiveEntities() => Future.value(entities.toSet());
+
+  @override
+  Future<Set<Category>> getActiveCategories() async {
+    return store.categories();
+  }
 
   @override
   void addTransaction(Transaction toAdd) {
@@ -117,6 +121,7 @@ class _MockData implements DataInterface {
   void dispose() {
     _streamController.sink.close();
     _streamController.close();
+    store.dispose();
   }
 }
 
@@ -132,7 +137,6 @@ class UserData {
   List<Entity> entities;
   List<Category> categories;
   int lastId;
-  Map<TransactionComponent, double> upToNow;
   List<Map<Entity, double>> entityMonthly; // TODO: refine to specify month
   List<Transaction> toReturns; //TODO: shrink down?
 }
