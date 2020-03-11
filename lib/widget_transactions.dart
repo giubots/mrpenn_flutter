@@ -24,8 +24,8 @@ const IconData _lookIcon = Icons.search;
 /// Start loading the data and then shows a [_TransactionForm].
 /// When done returns the inserted Transaction.
 class NewData extends StatelessWidget {
-  final dataHolder;
   final _validationKey = GlobalKey<_TransactionFormState>();
+  final dataHolder;
   final Transaction initialValues;
 
   NewData({
@@ -59,7 +59,7 @@ class NewData extends StatelessWidget {
                   availableCategories: snapshot.data[1],
                   initialValues: initialValues,
                   onSubmit: (transaction) =>
-                      Navigator.pop(context, transaction),
+                      Navigator.of(context).pop(transaction),
                 ),
               );
             }

@@ -12,8 +12,26 @@ abstract class DataInterface {
   /// Returns the entities that can be used to create a new Transaction.
   Future<Set<Entity>> getActiveEntities();
 
+  /// Returns all the entities.
+  Future<List<Entity>> getAllEntities();
+
   /// Returns the categories that can be used to create a new Transaction.
   Future<Set<Category>> getActiveCategories();
+
+  /// Returns all the categories.
+  Future<List<Category>> getAllCategories();
+
+  /// Adds the specified category.
+  Future<void> addCategory(Category category);
+
+  /// Updates the specified category.
+  Future<void> updateCategory({Category old, Category newCategory});
+
+  /// Adds the specified category.
+  Future<void> addEntity(Entity entity);
+
+  /// Updates the specified category.
+  Future<void> updateEntity({Entity old, Entity newEntity});
 
   /// Returns a stream with the transaction snapshots.
   Stream<List<Transaction>> getStream();
@@ -88,9 +106,7 @@ class _MockData implements DataInterface {
   Future<Set<Entity>> getActiveEntities() => Future.value(entities.toSet());
 
   @override
-  Future<Set<Category>> getActiveCategories() async {
-    return store.categories();
-  }
+  Future<Set<Category>> getActiveCategories() => Future.value(categories.toSet());
 
   @override
   void addTransaction(Transaction toAdd) {
@@ -122,6 +138,38 @@ class _MockData implements DataInterface {
     _streamController.sink.close();
     _streamController.close();
     store.dispose();
+  }
+
+  @override
+  Future<List<Category>> getAllCategories() {
+    return Future.delayed(Duration(seconds: 2), () => categories);
+  }
+
+  @override
+  Future<void> addCategory(Category category) async {
+    categories.add(category);
+  }
+
+  @override
+  Future<void> updateCategory({Category old, Category newCategory}) async {
+    categories.remove(old);
+    categories.add(newCategory);
+  }
+
+  @override
+  Future<List<Entity>> getAllEntities() {
+    return Future.delayed(Duration(seconds: 2), () => entities);
+  }
+
+  @override
+  Future<void> addEntity(Entity entity) async {
+    entities.add(entity);
+  }
+
+  @override
+  Future<void> updateEntity({Entity old, Entity newEntity}) async {
+    entities.remove(old);
+    entities.add(newEntity);
   }
 }
 

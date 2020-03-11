@@ -85,6 +85,22 @@ class AppLocalizations {
     );
   }
 
+  String get newCategoryTitle {
+    return Intl.message(
+      'New Category',
+      desc: 'Title for the new category page',
+      locale: localeName,
+    );
+  }
+
+  String get newEntityTitle {
+    return Intl.message(
+      'New Entity',
+      desc: 'Title for the new entity page',
+      locale: localeName,
+    );
+  }
+
   String get titleLabel {
     return Intl.message(
       'Title',
@@ -121,6 +137,14 @@ class AppLocalizations {
     return Intl.message(
       'Categories',
       desc: 'Label for the field that contains the categories',
+      locale: localeName,
+    );
+  }
+
+  String get entityLabel {
+    return Intl.message(
+      'Entities',
+      desc: 'Label for the field that contains the entities',
       locale: localeName,
     );
   }
@@ -190,6 +214,55 @@ class AppLocalizations {
     );
   }
 
+  String get nameLabel {
+    return Intl.message(
+      'Name',
+      desc: 'Label for the field containing the name of a category or entity',
+      locale: localeName,
+    );
+  }
+
+  String get activeLabel {
+    return Intl.message(
+      'Is active',
+      desc: 'Label for the field specifying if a category or entity is active',
+      locale: localeName,
+    );
+  }
+
+  String get preferredLabel {
+    return Intl.message(
+      'Is preferred',
+      desc:
+          'Label for the field specifying if a category or entity is preferred',
+      locale: localeName,
+    );
+  }
+
+  String get initialValueLabel {
+    return Intl.message(
+      'Initial value',
+      desc: 'Label for the field containing the initial value of an entity',
+      locale: localeName,
+    );
+  }
+
+  String get inTotalLabel {
+    return Intl.message(
+      'Appears in the total',
+      desc: 'Label for the field specifying if an entity appears in the totals',
+      locale: localeName,
+    );
+  }
+
+  String get positiveLabel {
+    return Intl.message(
+      'Is positive',
+      desc: 'Label for the field specifying if a category has positive value',
+      locale: localeName,
+    );
+  }
+
   String get amountError {
     return Intl.message(
       'Insert a number greather than 0',
@@ -234,6 +307,14 @@ class AppLocalizations {
     return Intl.message(
       'Transaction not found',
       desc: 'Specifies that the required transaction was not found',
+      locale: localeName,
+    );
+  }
+
+  String get nameUnavailableError {
+    return Intl.message(
+      'Name unavailable',
+      desc: 'Specifies that the inserted name is not available',
       locale: localeName,
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mrpenn_flutter/widget_categories.dart';
+import 'package:mrpenn_flutter/widget_entities.dart';
 
 import 'handler_serialization.dart';
 import 'localization/localization.dart';
@@ -32,6 +34,20 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             tabs: <Tab>[
               Tab(text: AppLocalizations.of(context).hudTitle.toUpperCase()),
               Tab(text: AppLocalizations.of(context).seeAllTitle.toUpperCase()),
+            ],
+          ),
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children: <Widget>[
+              ListTile(
+                title: Text(AppLocalizations.of(context).categoryLabel),
+                onTap: _onCategory,
+              ),
+              ListTile(
+                title: Text(AppLocalizations.of(context).entityLabel),
+                onTap: _onEntity,
+              ),
             ],
           ),
         ),
@@ -129,5 +145,26 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       DataInterface().removeTransaction(transaction);
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     }
+  }
+
+  void _onEntity() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => EntityPage(
+              entitiesCallback: () => DataInterface().getAllEntities(),
+              modifiedEntityCallback: (oldE, newE) =>
+                  DataInterface().updateEntity(old: oldE, newEntity: newE),
+              newEntityCallback: (entity) => DataInterface().addEntity(entity),
+            )));
+  }
+
+  void _onCategory() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => CategoryPage(
+              categoriesCallback: () => DataInterface().getAllCategories(),
+              modifiedCategoryCallback: (oldC, newC) =>
+                  DataInterface().updateCategory(old: oldC, newCategory: newC),
+              newCategoryCallback: (category) =>
+                  DataInterface().addCategory(category),
+            )));
   }
 }
