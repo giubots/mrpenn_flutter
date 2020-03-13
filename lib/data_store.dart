@@ -26,99 +26,139 @@ final String _entitiesTable = 'entities';
 final String _categoriesTable = 'categories';
 final String _transactionsTable = 'transactions';
 
-class DataStore {
+/// This is used to adapt the sqflite api for the database to the system.
+class SqfliteHandler {
+  /// The version of the database, used for future updates.
   static final int _currentVersion = 1;
+
+  /// An instance of the database.
   Future<Database> _database;
 
-  DataStore() {
-    _setup();
-  }
+  /// Creates the database if it does not exists and opens it.
+  ///
+  /// Not safe for immediate use. After calling this [setup] must be called.
+  SqfliteHandler();
 
-  void _setup() async {
+  Future<void> setup() async {
     var databasesPath = await getDatabasesPath();
     await Directory(databasesPath).create(recursive: true);
-
     _database = openDatabase(
       join(databasesPath, 'mrPenn_data.db'),
       onCreate: (db, version) async {
         await db.execute(
-            'CREATE TABLE $_entitiesTable($_nameLabel TEXT PRIMARY KEY, $_activeLabel INTEGER, $_preferredLabel INTEGER, $_initialValueLabel REAL, $_inTotalLabel INTEGER)');
+          'CREATE TABLE $_entitiesTable('
+          '$_nameLabel TEXT PRIMARY KEY, '
+          '$_activeLabel INTEGER, '
+          '$_preferredLabel INTEGER, '
+          '$_initialValueLabel REAL, '
+          '$_inTotalLabel INTEGER)',
+        );
         await db.execute(
-            'CREATE TABLE $_categoriesTable($_nameLabel TEXT PRIMARY KEY, $_activeLabel INTEGER, $_preferredLabel INTEGER, $_positiveLabel INTEGER)');
+          'CREATE TABLE $_categoriesTable('
+          '$_nameLabel TEXT PRIMARY KEY, '
+          '$_activeLabel INTEGER, '
+          '$_preferredLabel INTEGER, '
+          '$_positiveLabel INTEGER)',
+        );
         await db.execute(
-            'CREATE TABLE $_transactionsTable($_titleLabel TEXT, $_idLabel INTEGER PRIMARY KEY, $_amountLabel REAL, $_originEntityIdLabel TEXT, $_destinationEntityIdLabel TEXT, $_categoriesIdListLabel TEXT, $_toReturnLabel INTEGER, $_dateTimeLabel INTEGER, $_notesLabel TEXT, $_returnIdLabel INTEGER)');
+          'CREATE TABLE $_transactionsTable('
+          '$_titleLabel TEXT, '
+          '$_idLabel INTEGER PRIMARY KEY, '
+          '$_amountLabel REAL, '
+          '$_originEntityIdLabel TEXT, '
+          '$_destinationEntityIdLabel TEXT, '
+          '$_categoriesIdListLabel TEXT, '
+          '$_toReturnLabel INTEGER, '
+          '$_dateTimeLabel INTEGER, '
+          '$_notesLabel TEXT, '
+          '$_returnIdLabel INTEGER)',
+        );
       },
       version: _currentVersion,
       onOpen: (db) async => print('db version ${await db.getVersion()}'),
     );
   }
 
-  Future<Set<model.Entity>> entities() async =>
+  Future<void> dispose() async => await (await _database).close();
+
+  Future<Set<model.Entity>> getEntities() async =>
       (await _database).query(_entitiesTable).then((value) =>
           value.map((e) => SerializedEntity.fromJson(e).toEntity()).toSet());
 
-  Future<Set<model.Category>> categories() async =>
+  Future<void> addEntity(model.Entity toAdd) async =>
+      await (await _database).insert(
+        _entitiesTable,
+        SerializedEntity.fromEntity(toAdd).toJson(),
+      );
+
+  Future<void> removeEntity(model.Entity toRemove) async =>
+      await (await _database).delete(
+        _entitiesTable,
+        where: '$_nameLabel = ?',
+        whereArgs: [SerializedEntity.fromEntity(toRemove).name],
+      );
+
+  Future<void> updateEntity(model.Entity toUpdate) async {
+    var ser = SerializedEntity.fromEntity(toUpdate);
+    await (await _database).update(
+      _entitiesTable,
+      ser.toJson(),
+      where: '$_nameLabel = ?',
+      whereArgs: [ser.name],
+    );
+  }
+
+  Future<Set<model.Category>> getCategories() async =>
       (await _database).query(_categoriesTable).then((value) => value
           .map((e) => SerializedCategory.fromJson(e).toCategory())
           .toSet());
 
-  model.Entity getEntity(String name) {
-    return model.Entity(name: 'robot'); //TODO
+  Future<void> addCategory(model.Category toAdd) async =>
+      await (await _database).insert(
+        _categoriesTable,
+        SerializedCategory.fromCategory(toAdd).toJson(),
+      );
+
+  Future<void> removeCategory(model.Category toRemove) async =>
+      await (await _database).delete(
+        _categoriesTable,
+        where: '$_nameLabel = ?',
+        whereArgs: [SerializedCategory.fromCategory(toRemove).name],
+      );
+
+  Future<void> updateCategory(model.Category toUpdate) async {
+    var ser = SerializedCategory.fromCategory(toUpdate);
+    await (await _database).update(
+      _categoriesTable,
+      ser.toJson(),
+      where: '$_nameLabel = ?',
+      whereArgs: [ser.name],
+    );
   }
 
-  model.Category getCategory(String name) {
-    return model.Category(name: 'cyclop'); //TODO
-  }
 
-  void dispose() async {
-    (await _database).close();
-  }
+
+
+
+
+
+  //TODO manage transactions
+
+
+
+
+
+
+
+
+
+
+  Future<model.Entity> _getEntity(String name) => getEntities()
+      .then((value) => value.firstWhere((element) => element.name == name));
+
+  Future<model.Category> _getCategory(String name) => getCategories()
+      .then((value) => value.firstWhere((element) => element.name == name));
 }
-
-//  Future<void> insertDog(Dog dog) async {
-//    // Get a reference to the database.
-//    final Database db = await database;
-//
-//    // Insert the Dog into the correct table. Also specify the
-//    // `conflictAlgorithm`. In this case, if the same dog is inserted
-//    // multiple times, it replaces the previous data.
-//    await db.insert(
-//      'dogs',
-//      dog.toMap(),
-//      conflictAlgorithm: ConflictAlgorithm.replace,
-//    );
-//  }
-//
-
-//
-//  Future<void> updateDog(Dog dog) async {
-//    // Get a reference to the database.
-//    final db = await database;
-//
-//    // Update the given Dog.
-//    await db.update(
-//      'dogs',
-//      dog.toMap(),
-//      // Ensure that the Dog has a matching id.
-//      where: "id = ?",
-//      // Pass the Dog's id as a whereArg to prevent SQL injection.
-//      whereArgs: [dog.id],
-//    );
-//  }
-//
-//  Future<void> deleteDog(int id) async {
-//    // Get a reference to the database.
-//    final db = await database;
-//
-//    // Remove the Dog from the database.
-//    await db.delete(
-//      'dogs',
-//      // Use a `where` clause to delete a specific dog.
-//      where: "id = ?",
-//      // Pass the Dog's id as a whereArg to prevent SQL injection.
-//      whereArgs: [id],
-//    );
-//  }
 
 class SerializedTransaction {
   final String title;
@@ -147,15 +187,16 @@ class SerializedTransaction {
         notes = from.notes,
         returnId = from.returnId;
 
-  model.Transaction toTransaction(DataStore data) => model.Transaction(
+  Future<model.Transaction> toTransaction(SqfliteHandler data) async =>
+      model.Transaction(
         title: title,
         id: id,
         amount: amount,
-        originEntity: data.getEntity(originEntityId),
-        destinationEntity: data.getEntity(destinationEntityId),
+        originEntity: await data._getEntity(originEntityId),
+        destinationEntity: await data._getEntity(destinationEntityId),
         categories: Set<model.Category>.from(jsonDecode(categoriesIdList)
             .cast<String>()
-            .map((e) => data.getCategory(e))),
+            .map((e) => data._getCategory(e))),
         toReturn: toReturn == 1,
         dateTime: DateTime.fromMicrosecondsSinceEpoch(dateTime),
         notes: notes,

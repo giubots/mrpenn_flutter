@@ -72,21 +72,66 @@ void main() {
   });
 }
 
-class MyData implements DataStore {
+class MyData implements SqfliteHandler {
   @override
-  Category getCategory(String name) =>
+  Category _getCategory(String name) =>
       categoryList.firstWhere((element) => element.name == name);
 
   @override
-  Entity getEntity(String name) =>
+  Entity _getEntity(String name) =>
       entityList.firstWhere((element) => element.name == name);
 
   @override
-  Future<Set<Entity>> entities() => throw UnimplementedError();
+  Future<Set<Entity>> getEntities() => throw UnimplementedError();
 
   @override
-  Future<Set<Category>> categories() => throw UnimplementedError();
+  Future<Set<Category>> getCategories() => throw UnimplementedError();
 
   @override
-  void dispose() {}
+  Future<void> addCategory(Category toAdd) {
+    // TODO: implement addCategory
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> addEntity(Entity toAdd) {
+    // TODO: implement addEntity
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> removeCategory(Category toRemove) {
+    // TODO: implement removeCategory
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> removeEntity(Entity toRemove) {
+    // TODO: implement removeEntity
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> setup() {
+    // TODO: implement setup
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateCategory(Category toUpdate) {
+    // TODO: implement updateCategory
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updateEntity(Entity toUpdate) {
+    // TODO: implement updateEntity
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> dispose() {
+    // TODO: implement dispose
+    throw UnimplementedError();
+  }
 }

@@ -5,7 +5,7 @@ import 'model.dart';
 
 /// This represents an object that can provide the app data to the front end.
 abstract class DataInterface {
-  static DataInterface _instance = _MockData();
+  static DataInterface _instance = _SqlData();
 
   factory DataInterface() => _instance;
 
@@ -50,7 +50,6 @@ abstract class DataInterface {
 }
 
 class _MockData implements DataInterface {
-  DataStore store;
   static final _streamController =
       StreamController<List<Transaction>>.broadcast(
     onListen: () => _streamController.sink.add(transactions),
@@ -100,13 +99,12 @@ class _MockData implements DataInterface {
     ),
   ];
 
-  _MockData() : store = DataStore();
-
   @override
   Future<Set<Entity>> getActiveEntities() => Future.value(entities.toSet());
 
   @override
-  Future<Set<Category>> getActiveCategories() => Future.value(categories.toSet());
+  Future<Set<Category>> getActiveCategories() =>
+      Future.value(categories.toSet());
 
   @override
   void addTransaction(Transaction toAdd) {
@@ -137,7 +135,6 @@ class _MockData implements DataInterface {
   void dispose() {
     _streamController.sink.close();
     _streamController.close();
-    store.dispose();
   }
 
   @override
@@ -171,6 +168,76 @@ class _MockData implements DataInterface {
     entities.remove(old);
     entities.add(newEntity);
   }
+}
+
+class _SqlData implements DataInterface {
+  final SqfliteHandler _database;
+  final _streamController = StreamController<List<Transaction>>.broadcast(
+      //onListen: () => _streamController.sink.add(transactions),//TODO
+      );
+
+  _SqlData() : _database = SqfliteHandler();
+
+  @override
+  void dispose() {
+    _streamController.sink.close();
+    _streamController.close();
+    _database.dispose();
+  }
+
+  @override
+  Stream<List<Transaction>> getStream() => _streamController.stream;
+
+  @override
+  void addTransaction(Transaction toAdd) {
+    assert(toAdd != null);
+    //TODO
+  }
+
+  @override
+  void updateTransaction({Transaction old, Transaction newTransaction}) {
+    assert(old != null && newTransaction != null);
+//todo
+  }
+
+  @override
+  void removeTransaction(Transaction toRemove) {
+    assert(toRemove != null);
+//todo
+  }
+
+  @override
+  Future<List<Category>> getAllCategories() =>
+      _database.getCategories().then((value) => value.toList());
+
+  @override
+  Future<Set<Category>> getActiveCategories() => _database
+      .getCategories()
+      .then((value) => value.where((element) => element.active).toSet());
+
+  @override
+  Future<void> addCategory(Category category) =>
+      _database.addCategory(category);
+
+  @override
+  Future<void> updateCategory({Category old, Category newCategory}) =>
+      _database.updateCategory(newCategory);
+
+  @override
+  Future<List<Entity>> getAllEntities() =>
+      _database.getEntities().then((value) => value.toList());
+
+  @override
+  Future<Set<Entity>> getActiveEntities() => _database
+      .getEntities()
+      .then((value) => value.where((element) => element.active).toSet());
+
+  @override
+  Future<void> addEntity(Entity entity) => _database.addEntity(entity);
+
+  @override
+  Future<void> updateEntity({Entity old, Entity newEntity}) =>
+      _database.updateEntity(newEntity);
 }
 
 /// A collection of transactions with some data associated with it.
