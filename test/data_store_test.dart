@@ -72,66 +72,12 @@ void main() {
   });
 }
 
-class MyData implements SqfliteHandler {
+class MyData with InstanceProvider {
   @override
-  Category _getCategory(String name) =>
+  Category getCategory(String name) =>
       categoryList.firstWhere((element) => element.name == name);
 
   @override
-  Entity _getEntity(String name) =>
+  Entity getEntity(String name) =>
       entityList.firstWhere((element) => element.name == name);
-
-  @override
-  Future<Set<Entity>> getEntities() => throw UnimplementedError();
-
-  @override
-  Future<Set<Category>> getCategories() => throw UnimplementedError();
-
-  @override
-  Future<void> addCategory(Category toAdd) {
-    // TODO: implement addCategory
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> addEntity(Entity toAdd) {
-    // TODO: implement addEntity
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeCategory(Category toRemove) {
-    // TODO: implement removeCategory
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> removeEntity(Entity toRemove) {
-    // TODO: implement removeEntity
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> setup() {
-    // TODO: implement setup
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> updateCategory(Category toUpdate) {
-    // TODO: implement updateCategory
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> updateEntity(Entity toUpdate) {
-    // TODO: implement updateEntity
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> dispose() {
-    // TODO: implement dispose
-    throw UnimplementedError();
-  }
 }

@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'model.dart' as model;
 
+/// Some labels for serialization.
 final String _titleLabel = 'title';
 final String _idLabel = 'id';
 final String _amountLabel = 'amount';
@@ -27,70 +29,78 @@ final String _categoriesTable = 'categories';
 final String _transactionsTable = 'transactions';
 
 /// This is used to adapt the sqflite api for the database to the system.
-class SqfliteHandler {
+class SqfliteAdapter {
   /// The version of the database, used for future updates.
   static final int _currentVersion = 1;
 
-  /// An instance of the database.
-  Future<Database> _database;
+  /// A future instance of the database.
+  final Future<Database> _database;
+
+  /// Entity and category provider for serializing Transactions.
+  final InstanceProvider _provider;
 
   /// Creates the database if it does not exists and opens it.
   ///
-  /// Not safe for immediate use. After calling this [setup] must be called.
-  SqfliteHandler();
+  /// Remember to [dispose].
+  SqfliteAdapter(InstanceProvider provider)
+      : assert(provider != null),
+        _provider = provider,
+        _database = getDatabasesPath().then((databasesPath) =>
+            Directory(databasesPath)
+                .create(recursive: true)
+                .then((_) => openDatabase(
+                      join(databasesPath, 'mrPenn_data.db'),
+                      onCreate: (db, version) async {
+                        await db.execute(
+                          'CREATE TABLE $_entitiesTable('
+                          '$_nameLabel TEXT PRIMARY KEY, '
+                          '$_activeLabel INTEGER, '
+                          '$_preferredLabel INTEGER, '
+                          '$_initialValueLabel REAL, '
+                          '$_inTotalLabel INTEGER)',
+                        );
+                        await db.execute(
+                          'CREATE TABLE $_categoriesTable('
+                          '$_nameLabel TEXT PRIMARY KEY, '
+                          '$_activeLabel INTEGER, '
+                          '$_preferredLabel INTEGER, '
+                          '$_positiveLabel INTEGER)',
+                        );
+                        await db.execute(
+                          'CREATE TABLE $_transactionsTable('
+                          '$_titleLabel TEXT, '
+                          '$_idLabel INTEGER PRIMARY KEY, '
+                          '$_amountLabel REAL, '
+                          '$_originEntityIdLabel TEXT, '
+                          '$_destinationEntityIdLabel TEXT, '
+                          '$_categoriesIdListLabel TEXT, '
+                          '$_toReturnLabel INTEGER, '
+                          '$_dateTimeLabel INTEGER, '
+                          '$_notesLabel TEXT, '
+                          '$_returnIdLabel INTEGER)',
+                        );
+                      },
+                      version: _currentVersion,
+                      onOpen: (db) async =>
+                          print('db version ${await db.getVersion()}'),
+                    )));
 
-  Future<void> setup() async {
-    var databasesPath = await getDatabasesPath();
-    await Directory(databasesPath).create(recursive: true);
-    _database = openDatabase(
-      join(databasesPath, 'mrPenn_data.db'),
-      onCreate: (db, version) async {
-        await db.execute(
-          'CREATE TABLE $_entitiesTable('
-          '$_nameLabel TEXT PRIMARY KEY, '
-          '$_activeLabel INTEGER, '
-          '$_preferredLabel INTEGER, '
-          '$_initialValueLabel REAL, '
-          '$_inTotalLabel INTEGER)',
-        );
-        await db.execute(
-          'CREATE TABLE $_categoriesTable('
-          '$_nameLabel TEXT PRIMARY KEY, '
-          '$_activeLabel INTEGER, '
-          '$_preferredLabel INTEGER, '
-          '$_positiveLabel INTEGER)',
-        );
-        await db.execute(
-          'CREATE TABLE $_transactionsTable('
-          '$_titleLabel TEXT, '
-          '$_idLabel INTEGER PRIMARY KEY, '
-          '$_amountLabel REAL, '
-          '$_originEntityIdLabel TEXT, '
-          '$_destinationEntityIdLabel TEXT, '
-          '$_categoriesIdListLabel TEXT, '
-          '$_toReturnLabel INTEGER, '
-          '$_dateTimeLabel INTEGER, '
-          '$_notesLabel TEXT, '
-          '$_returnIdLabel INTEGER)',
-        );
-      },
-      version: _currentVersion,
-      onOpen: (db) async => print('db version ${await db.getVersion()}'),
-    );
-  }
+  /// Closes the database.
+  Future<void> dispose() async => (await _database).close();
 
-  Future<void> dispose() async => await (await _database).close();
-
+  /// Returns all the entities in the database.
   Future<Set<model.Entity>> getEntities() async =>
       (await _database).query(_entitiesTable).then((value) =>
           value.map((e) => SerializedEntity.fromJson(e).toEntity()).toSet());
 
+  /// Adds an entity to the database
   Future<void> addEntity(model.Entity toAdd) async =>
       await (await _database).insert(
         _entitiesTable,
         SerializedEntity.fromEntity(toAdd).toJson(),
       );
 
+  /// Removes an entity in the database
   Future<void> removeEntity(model.Entity toRemove) async =>
       await (await _database).delete(
         _entitiesTable,
@@ -98,6 +108,7 @@ class SqfliteHandler {
         whereArgs: [SerializedEntity.fromEntity(toRemove).name],
       );
 
+  /// Updates an entity in the database
   Future<void> updateEntity(model.Entity toUpdate) async {
     var ser = SerializedEntity.fromEntity(toUpdate);
     await (await _database).update(
@@ -108,17 +119,20 @@ class SqfliteHandler {
     );
   }
 
+  /// Returns all the categories in the database.
   Future<Set<model.Category>> getCategories() async =>
       (await _database).query(_categoriesTable).then((value) => value
           .map((e) => SerializedCategory.fromJson(e).toCategory())
           .toSet());
 
+  /// Adds a category to the database
   Future<void> addCategory(model.Category toAdd) async =>
       await (await _database).insert(
         _categoriesTable,
         SerializedCategory.fromCategory(toAdd).toJson(),
       );
 
+  /// Removes a category in the database
   Future<void> removeCategory(model.Category toRemove) async =>
       await (await _database).delete(
         _categoriesTable,
@@ -126,6 +140,7 @@ class SqfliteHandler {
         whereArgs: [SerializedCategory.fromCategory(toRemove).name],
       );
 
+  /// Updates a category in the database
   Future<void> updateCategory(model.Category toUpdate) async {
     var ser = SerializedCategory.fromCategory(toUpdate);
     await (await _database).update(
@@ -136,30 +151,57 @@ class SqfliteHandler {
     );
   }
 
+  /// Returns all the transaction in the database.
+  Future<Set<model.Transaction>> getTransactions() async =>
+      (await _database).query(_transactionsTable).then((value) => value
+          .map(
+              (e) => SerializedTransaction.fromJson(e).toTransaction(_provider))
+          .toSet());
 
+  /// Adds a transaction to the database
+  Future<void> addTransaction(model.Transaction toAdd) async =>
+      await (await _database).insert(
+        _transactionsTable,
+        SerializedTransaction.fromTransaction(toAdd).toJson(),
+      );
 
+  /// Removes a transaction from the database.
+  Future<void> removeTransaction(model.Transaction toRemove) async =>
+      await (await _database).delete(
+        _transactionsTable,
+        where: '$_idLabel = ?',
+        whereArgs: [SerializedTransaction.fromTransaction(toRemove).id],
+      );
 
-
-
-
-  //TODO manage transactions
-
-
-
-
-
-
-
-
-
-
-  Future<model.Entity> _getEntity(String name) => getEntities()
-      .then((value) => value.firstWhere((element) => element.name == name));
-
-  Future<model.Category> _getCategory(String name) => getCategories()
-      .then((value) => value.firstWhere((element) => element.name == name));
+  /// Updates a transaction in the database.
+  Future<void> updateTransaction(model.Transaction toUpdate) async {
+    var ser = SerializedTransaction.fromTransaction(toUpdate);
+    await (await _database).update(
+      _transactionsTable,
+      ser.toJson(),
+      where: '$_idLabel = ?',
+      whereArgs: [ser.id],
+    );
+  }
 }
 
+/// A mixin that provides the instance of an entity or category given its name.
+///
+/// Ensure that no transaction is requested from the database before the data
+/// needed by the class implementing this is ready!
+mixin InstanceProvider {
+  /// Returns the entity with the given name.
+  model.Entity getEntity(String name);
+
+  /// Returns the category with the given name.
+  model.Category getCategory(String name);
+}
+
+/// A serialization helper class for a transaction object.
+///
+/// Entities and categories are serialized with their name, the categories list
+/// is serialized as a json string.
+@visibleForTesting
 class SerializedTransaction {
   final String title;
   final int id;
@@ -187,16 +229,15 @@ class SerializedTransaction {
         notes = from.notes,
         returnId = from.returnId;
 
-  Future<model.Transaction> toTransaction(SqfliteHandler data) async =>
-      model.Transaction(
+  model.Transaction toTransaction(InstanceProvider p) => model.Transaction(
         title: title,
         id: id,
         amount: amount,
-        originEntity: await data._getEntity(originEntityId),
-        destinationEntity: await data._getEntity(destinationEntityId),
+        originEntity: p.getEntity(originEntityId),
+        destinationEntity: p.getEntity(destinationEntityId),
         categories: Set<model.Category>.from(jsonDecode(categoriesIdList)
             .cast<String>()
-            .map((e) => data._getCategory(e))),
+            .map((e) => p.getCategory(e))),
         toReturn: toReturn == 1,
         dateTime: DateTime.fromMicrosecondsSinceEpoch(dateTime),
         notes: notes,
@@ -230,6 +271,8 @@ class SerializedTransaction {
       };
 }
 
+/// A serialization helper class for an entity object.
+@visibleForTesting
 class SerializedEntity {
   final String name;
   final int active;
@@ -270,6 +313,8 @@ class SerializedEntity {
       };
 }
 
+/// A serialization helper class for a category object.
+@visibleForTesting
 class SerializedCategory {
   final String name;
   final int active;
