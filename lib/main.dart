@@ -14,10 +14,10 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.light(),
       initialRoute: '/',
       routes: {
-        '/': (context) => Home(),
+        '/': (context) => const Home(),
       },
       localizationsDelegates: [
-        AppLocalizationsDelegate(),
+        const AppLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         //GlobalCupertinoLocalizations.delegate,//FIXME iOS

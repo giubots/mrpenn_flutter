@@ -94,22 +94,27 @@ class SqfliteAdapter {
           value.map((e) => SerializedEntity.fromJson(e).toEntity()).toSet());
 
   /// Adds an entity to the database
-  Future<void> addEntity(model.Entity toAdd) async =>
-      await (await _database).insert(
-        _entitiesTable,
-        SerializedEntity.fromEntity(toAdd).toJson(),
-      );
+  Future<void> addEntity(model.Entity toAdd) async {
+    assert(toAdd != null);
+    await (await _database).insert(
+      _entitiesTable,
+      SerializedEntity.fromEntity(toAdd).toJson(),
+    );
+  }
 
   /// Removes an entity in the database
-  Future<void> removeEntity(model.Entity toRemove) async =>
-      await (await _database).delete(
-        _entitiesTable,
-        where: '$_nameLabel = ?',
-        whereArgs: [SerializedEntity.fromEntity(toRemove).name],
-      );
+  Future<void> removeEntity(model.Entity toRemove) async {
+    assert(toRemove != null);
+    await (await _database).delete(
+      _entitiesTable,
+      where: '$_nameLabel = ?',
+      whereArgs: [SerializedEntity.fromEntity(toRemove).name],
+    );
+  }
 
   /// Updates an entity in the database
   Future<void> updateEntity(model.Entity toUpdate) async {
+    assert(toUpdate != null);
     var ser = SerializedEntity.fromEntity(toUpdate);
     await (await _database).update(
       _entitiesTable,
@@ -126,22 +131,27 @@ class SqfliteAdapter {
           .toSet());
 
   /// Adds a category to the database
-  Future<void> addCategory(model.Category toAdd) async =>
-      await (await _database).insert(
-        _categoriesTable,
-        SerializedCategory.fromCategory(toAdd).toJson(),
-      );
+  Future<void> addCategory(model.Category toAdd) async {
+    assert(toAdd != null);
+    await (await _database).insert(
+      _categoriesTable,
+      SerializedCategory.fromCategory(toAdd).toJson(),
+    );
+  }
 
   /// Removes a category in the database
-  Future<void> removeCategory(model.Category toRemove) async =>
-      await (await _database).delete(
-        _categoriesTable,
-        where: '$_nameLabel = ?',
-        whereArgs: [SerializedCategory.fromCategory(toRemove).name],
-      );
+  Future<void> removeCategory(model.Category toRemove) async {
+    assert(toRemove != null);
+    await (await _database).delete(
+      _categoriesTable,
+      where: '$_nameLabel = ?',
+      whereArgs: [SerializedCategory.fromCategory(toRemove).name],
+    );
+  }
 
   /// Updates a category in the database
   Future<void> updateCategory(model.Category toUpdate) async {
+    assert(toUpdate != null);
     var ser = SerializedCategory.fromCategory(toUpdate);
     await (await _database).update(
       _categoriesTable,
@@ -152,29 +162,34 @@ class SqfliteAdapter {
   }
 
   /// Returns all the transaction in the database.
-  Future<Set<model.Transaction>> getTransactions() async =>
+  Future<List<model.Transaction>> getTransactions() async =>
       (await _database).query(_transactionsTable).then((value) => value
           .map(
               (e) => SerializedTransaction.fromJson(e).toTransaction(_provider))
-          .toSet());
+          .toList());
 
   /// Adds a transaction to the database
-  Future<void> addTransaction(model.Transaction toAdd) async =>
-      await (await _database).insert(
-        _transactionsTable,
-        SerializedTransaction.fromTransaction(toAdd).toJson(),
-      );
+  Future<void> addTransaction(model.Transaction toAdd) async {
+    assert(toAdd != null);
+    await (await _database).insert(
+      _transactionsTable,
+      SerializedTransaction.fromTransaction(toAdd).toJson(),
+    );
+  }
 
   /// Removes a transaction from the database.
-  Future<void> removeTransaction(model.Transaction toRemove) async =>
-      await (await _database).delete(
-        _transactionsTable,
-        where: '$_idLabel = ?',
-        whereArgs: [SerializedTransaction.fromTransaction(toRemove).id],
-      );
+  Future<void> removeTransaction(model.Transaction toRemove) async {
+    assert(toRemove != null);
+    await (await _database).delete(
+      _transactionsTable,
+      where: '$_idLabel = ?',
+      whereArgs: [SerializedTransaction.fromTransaction(toRemove).id],
+    );
+  }
 
   /// Updates a transaction in the database.
   Future<void> updateTransaction(model.Transaction toUpdate) async {
+    assert(toUpdate != null);
     var ser = SerializedTransaction.fromTransaction(toUpdate);
     await (await _database).update(
       _transactionsTable,
@@ -216,7 +231,6 @@ class SerializedTransaction {
 
   SerializedTransaction.fromTransaction(model.Transaction from)
       : assert(from != null),
-        assert(from.id != -1, 'Uncompleted transactions can not be serialized'),
         title = from.title,
         id = from.id,
         amount = from.amount,

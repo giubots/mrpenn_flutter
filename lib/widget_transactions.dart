@@ -25,7 +25,7 @@ const IconData _lookIcon = Icons.search;
 /// When done returns the inserted Transaction.
 class NewData extends StatelessWidget {
   final _validationKey = GlobalKey<_TransactionFormState>();
-  final dataHolder;
+  final Future<List<Set>> dataHolder;
   final Transaction initialValues;
 
   NewData({
@@ -73,7 +73,7 @@ class NewData extends StatelessWidget {
 class _TransactionForm extends StatefulWidget {
   final Set<Category> availableCategories;
   final Set<Entity> availableEntities;
-  final void Function(Transaction transaction) onSubmit;
+  final void Function(IncompleteTransaction transaction) onSubmit;
   final Transaction initialValues;
 
   const _TransactionForm({
@@ -138,7 +138,7 @@ class _TransactionFormState extends State<_TransactionForm> {
             initialValue: _title,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).titleLabel),
-            validator: (value) => value.isEmpty //FIXME add maximum length?
+            validator: (value) => value.isEmpty //TODO add maximum length?
                 ? AppLocalizations.of(context).emptyFieldError
                 : null,
             onSaved: (newValue) => _title = newValue,
@@ -182,7 +182,8 @@ class _TransactionFormState extends State<_TransactionForm> {
           _DateFormField(
             initialValue: _dateTime,
             labelText: AppLocalizations.of(context).dateLabel,
-            firstDate: (selected) => selected.subtract(Duration(days: 365)),
+            firstDate: (selected) =>
+                selected.subtract(const Duration(days: 365)),
             lastDate: (_) => DateTime.now(),
             onSaved: (newValue) => _dateTime = newValue,
           ),
@@ -197,19 +198,6 @@ class _TransactionFormState extends State<_TransactionForm> {
             title: Text(AppLocalizations.of(context).toReturnLabel),
             onChanged: (value) => setState(() => _toReturn = !_toReturn),
           ),
-//          DropdownButtonFormField(TODO: choose to return from here.
-//            value: _returning,
-//            items: widget.availableToReturn.map((c) {
-//              return DropdownMenuItem(
-//                value: c.id,
-//                child: Text(c.notes),
-//              );
-//            }).toList(),
-//            decoration: InputDecoration(
-//                labelText: AppLocalizations.of(context).returningLabel),
-//            onChanged: (value) => null,
-//            onSaved: (newValue) => _returning = newValue,
-//          ),
         ],
       ),
     );
@@ -218,16 +206,16 @@ class _TransactionFormState extends State<_TransactionForm> {
   void _onSubmit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      widget.onSubmit(Transaction.fromScratch(
-        title: _title,
-        amount: _amount,
-        originEntity: _originEntity,
-        destinationEntity: _destinationEntity,
-        categories: _selectedCategories,
-        dateTime: _dateTime,
-        notes: _notes,
-        toReturn: _toReturn,
-      ));
+      widget.onSubmit(IncompleteTransaction(
+              title: _title,
+              amount: _amount,
+              originEntity: _originEntity,
+              destinationEntity: _destinationEntity,
+              categories: _selectedCategories,
+              dateTime: _dateTime,
+              notes: _notes,
+              toReturn: _toReturn,
+              returnId: _toReturn ? widget?.initialValues?.returnId : null));
     }
   }
 }
@@ -332,6 +320,7 @@ class _DateFormField extends FormField<DateTime> {
         );
 }
 
+/// A [Card] that displays the data of a transaction And allows to modify it.
 class _DetailsCard extends StatelessWidget {
   static const double _insets = 16;
   final Transaction transaction;
@@ -520,10 +509,20 @@ class _DetailsCard extends StatelessWidget {
   }
 }
 
+/// Shows a list of transactions.
+///
+/// When a transaction is pressed, the details are showed.
 class TransactionList extends StatelessWidget {
+  /// The elements to show.
   final List<Transaction> elements;
+
+  /// What happens when a delete button is pressed.
   final void Function(Transaction toDelete) onDelete;
+
+  /// What happens when a modify button is pressed.
   final void Function(Transaction toModify) onModify;
+
+  /// What happens when a return button is pressed.
   final void Function(Transaction toReturn) onReturn;
 
   const TransactionList({
@@ -584,6 +583,7 @@ class TransactionList extends StatelessWidget {
   }
 }
 
+/// Shows the child on top.
 class _CustomDialog extends Dialog {
   const _CustomDialog({Key key, child}) : super(key: key, child: child);
 

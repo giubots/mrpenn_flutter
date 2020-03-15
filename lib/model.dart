@@ -1,20 +1,11 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
-
-part 'model.g.dart';
 
 /// A transaction of money from a origin to a destination.
-@JsonSerializable(explicitToJson: true)
-class Transaction {
-  //TODO: make partial transaction superclass of this
-  static final int _defaultId = -1;
-
+///
+/// This transaction does not have an id and must be completed before submitting it.
+class IncompleteTransaction {
   /// The title that identifies this.
   final String title;
-
-  /// The id of the transaction.
-  final int id;
 
   /// The amount of the transaction.
   final double amount;
@@ -40,115 +31,54 @@ class Transaction {
   /// If the transaction had to be returned and was, this is the returning transaction.
   final int returnId;
 
-  /// Construct a complete transaction.
-  Transaction({
+  /// Construct an incomplete transaction.
+  IncompleteTransaction({
     @required this.title,
-    @required this.id,
     @required this.amount,
     @required this.originEntity,
     @required this.destinationEntity,
     categories,
-    this.toReturn = false,
+    toReturn,
     DateTime dateTime,
-    this.notes = '',
+    notes,
     this.returnId,
-  })  : dateTime = dateTime ?? DateTime.now(),
-        categories = categories ?? {},
-        assert(title != null && title.isNotEmpty),
-        assert(id != null),
+  })  : assert(title != null && title.isNotEmpty),
         assert(amount != null && amount >= 0),
         assert(originEntity != null),
         assert(destinationEntity != null),
-        assert(toReturn || returnId == null);
-
-  /// A transaction when it has not an id number yet.
-  Transaction.fromScratch({
-    @required title,
-    @required amount,
-    @required originEntity,
-    @required destinationEntity,
-    categories,
-    toReturn,
-    DateTime dateTime,
-    notes,
-    returnId,
-  }) : this(
-          title: title,
-          id: _defaultId,
-          amount: amount,
-          originEntity: originEntity,
-          destinationEntity: destinationEntity,
-          categories: categories,
-          toReturn: toReturn,
-          dateTime: dateTime,
-          notes: notes,
-          returnId: returnId,
-        );
-
-  /// Creates a transaction identical but with the new id.
-  Transaction.setId(
-    Transaction transaction,
-    int id,
-  ) : this(
-          title: transaction.title,
-          id: id,
-          amount: transaction.amount,
-          originEntity: transaction.originEntity,
-          destinationEntity: transaction.destinationEntity,
-          categories: transaction.categories,
-          toReturn: transaction.toReturn,
-          dateTime: transaction.dateTime,
-          notes: transaction.notes,
-          returnId: transaction.returnId,
-        );
-
-  /// Clones a transaction, fields can be changed.
-  Transaction.from(
-    Transaction toCopy, {
-    title,
-    id,
-    amount,
-    originEntity,
-    destinationEntity,
-    categories,
-    toReturn,
-    DateTime dateTime,
-    notes,
-    returnId,
-  }) : this(
-          title: title ?? toCopy.title,
-          id: id ?? toCopy.id,
-          amount: amount ?? toCopy.amount,
-          originEntity: originEntity ?? toCopy.originEntity,
-          destinationEntity: destinationEntity ?? toCopy.destinationEntity,
-          categories: categories ?? toCopy.categories,
-          toReturn: toReturn ?? toCopy.toReturn,
-          dateTime: dateTime ?? toCopy.dateTime,
-          notes: notes ?? toCopy.notes,
-          returnId: returnId ?? toCopy.returnId,
-        );
-
-  factory Transaction.fromJson(Map<String, dynamic> json) =>
-      _$TransactionFromJson(json);
+        assert((toReturn ?? false) || (returnId == null)),
+        categories = categories ?? {},
+        toReturn = toReturn ?? false,
+        dateTime = dateTime ?? DateTime.now(),
+        notes = notes ?? '';
 
   /// Returns true if this was toReturn and was returned.
-  bool get wasReturned {
-    return toReturn && returnId != null;
-  }
+  bool get wasReturned => toReturn && returnId != null;
 
-  Map<String, dynamic> toJson() => _$TransactionToJson(this);
+  /// Returns a complete transaction with the data from this.
+  Transaction complete(int id) => Transaction(
+        id: id,
+        title: title,
+        amount: amount,
+        originEntity: originEntity,
+        destinationEntity: destinationEntity,
+        categories: categories,
+        toReturn: toReturn,
+        dateTime: dateTime,
+        notes: notes,
+        returnId: returnId,
+      );
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is Transaction &&
+      other is IncompleteTransaction &&
           runtimeType == other.runtimeType &&
           title == other.title &&
-          id == other.id &&
           amount == other.amount &&
           originEntity == other.originEntity &&
           destinationEntity == other.destinationEntity &&
-          SetEquality().equals(categories, other.categories) &&
+          categories == other.categories &&
           toReturn == other.toReturn &&
           dateTime == other.dateTime &&
           notes == other.notes &&
@@ -157,7 +87,6 @@ class Transaction {
   @override
   int get hashCode =>
       title.hashCode ^
-      id.hashCode ^
       amount.hashCode ^
       originEntity.hashCode ^
       destinationEntity.hashCode ^
@@ -168,8 +97,77 @@ class Transaction {
       returnId.hashCode;
 }
 
+/// A transaction that has an id.
+class Transaction extends IncompleteTransaction {
+  /// The id of the transaction.
+  final int id;
+
+  /// Constructs a complete transaction.
+  Transaction({
+    @required title,
+    @required this.id,
+    @required amount,
+    @required originEntity,
+    @required destinationEntity,
+    categories,
+    toReturn,
+    DateTime dateTime,
+    notes,
+    returnId,
+  })  : assert(id != null),
+        super(
+          title: title,
+          amount: amount,
+          originEntity: originEntity,
+          destinationEntity: destinationEntity,
+          categories: categories,
+          toReturn: toReturn,
+          dateTime: dateTime,
+          notes: notes,
+          returnId: returnId,
+        );
+
+  /// Clones a transaction, fields can be changed, not the id.
+  Transaction.from(
+    Transaction toCopy, {
+    title,
+    amount,
+    originEntity,
+    destinationEntity,
+    categories,
+    toReturn,
+    DateTime dateTime,
+    notes,
+    returnId,
+  })  : id = toCopy.id,
+        super(
+          title: title ?? toCopy.title,
+          amount: amount ?? toCopy.amount,
+          originEntity: originEntity ?? toCopy.originEntity,
+          destinationEntity: destinationEntity ?? toCopy.destinationEntity,
+          categories: categories ?? toCopy.categories,
+          toReturn: toReturn ?? toCopy.toReturn,
+          dateTime: dateTime ?? toCopy.dateTime,
+          notes: notes ?? toCopy.notes,
+          returnId: returnId ?? toCopy.returnId,
+        );
+
+  @override
+  Transaction complete(int id) => throw UnsupportedError('Already completed');
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      super == other &&
+          other is Transaction &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
+
+  @override
+  int get hashCode => super.hashCode ^ id.hashCode;
+}
+
 /// An entity can be a source or destination for transactions.
-@JsonSerializable()
 class Entity {
   /// The name of this.
   final String name;
@@ -188,15 +186,11 @@ class Entity {
 
   Entity({
     @required this.name,
-    this.active,
-    this.preferred,
+    this.active = true,
+    this.preferred = false,
     this.initialValue = 0,
     this.inTotal = false,
-  });
-
-  factory Entity.fromJson(Map<String, dynamic> json) => _$EntityFromJson(json);
-
-  Map<String, dynamic> toJson() => _$EntityToJson(this);
+  }) : assert(name != null);
 
   @override
   bool operator ==(Object other) =>
@@ -219,7 +213,6 @@ class Entity {
 }
 
 /// A category for organizing the transactions.
-@JsonSerializable()
 class Category {
   /// The name of this.
   final String name;
@@ -235,15 +228,10 @@ class Category {
 
   Category({
     @required this.name,
-    this.active,
-    this.preferred,
+    this.active = true,
+    this.preferred = false,
     this.positive = true,
-  });
-
-  factory Category.fromJson(Map<String, dynamic> json) =>
-      _$CategoryFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CategoryToJson(this);
+  }) : assert(name != null);
 
   @override
   bool operator ==(Object other) =>
@@ -258,16 +246,4 @@ class Category {
   @override
   int get hashCode =>
       name.hashCode ^ active.hashCode ^ preferred.hashCode ^ positive.hashCode;
-}
-
-@JsonSerializable(explicitToJson: true)
-class TransactionsList {
-  List<Transaction> transactions;
-
-  TransactionsList({this.transactions});
-
-  factory TransactionsList.fromJson(Map<String, dynamic> json) =>
-      _$TransactionListFromJson(json);
-
-  Map<String, dynamic> toJson() => _$TransactionListToJson(this);
 }

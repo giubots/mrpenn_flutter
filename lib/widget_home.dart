@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mrpenn_flutter/controller_data.dart';
 import 'package:mrpenn_flutter/widget_categories.dart';
 import 'package:mrpenn_flutter/widget_entities.dart';
 
-import 'handler_serialization.dart';
 import 'localization/localization.dart';
 import 'model.dart';
 import 'widget_transactions.dart';
@@ -17,12 +17,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   final _tabsNumber = 2;
   TabController _tabController;
-  final Stream<List<Transaction>> _transaction = DataInterface().getStream();
+  Future<DataController> _dataController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: _tabsNumber, vsync: this);
+    _dataController = DataController.instance();
   }
 
   @override
@@ -51,53 +52,56 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
             ],
           ),
         ),
-        body: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            Container(child: Text('hi')),
-            StreamBuilder<List<Transaction>>(
-              initialData: [],
-              stream: _transaction,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return TransactionList(
-                    elements: snapshot.data,
-                    onReturn: _onReturn,
-                    onModify: _onModify,
-                    onDelete: _onDelete,
-                  );
-                }
-                return const CircularProgressIndicator();
-              },
-            )
-          ],
-        ),
+        body: FutureBuilder(
+            future: _dataController,
+            builder:
+                (BuildContext context, AsyncSnapshot<DataController> snapshot) {
+              if (snapshot.hasData) {
+                return TabBarView(
+                  controller: _tabController,
+                  children: <Widget>[
+                    Container(child: Text('hi')), //TODO hud
+                    StreamBuilder<List<Transaction>>(
+                      initialData: [],
+                      stream: snapshot.data.getStream(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return TransactionList(
+                            elements: snapshot.data,
+                            onReturn: _onReturn,
+                            onModify: _onModify,
+                            onDelete: _onDelete,
+                          );
+                        }
+                        return const CircularProgressIndicator();
+                      },
+                    )
+                  ],
+                );
+              }
+              return const CircularProgressIndicator();
+            }),
         floatingActionButton: FloatingActionButton(
           onPressed: _onNewData,
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       );
 
   @override
-  void dispose() {
+  void dispose() async {
     _tabController.dispose();
-    DataInterface().dispose();
+    await (await _dataController).dispose();
     super.dispose();
   }
 
-  void _onNewData() async {
-    var created = await _inputPage();
-    if (created != null) DataInterface().addTransaction(created);
-  }
-
-  Future<Transaction> _inputPage([Transaction from]) async {
+  Future<IncompleteTransaction> _inputPage([Transaction from]) async {
     return Navigator.push(
       context,
       MaterialPageRoute(
         builder: (BuildContext context) => NewData(
           dataHolder: Future.wait([
-            DataInterface().getActiveEntities(),
-            DataInterface().getActiveCategories(),
+            _dataController.then((value) => value.getActiveEntities()),
+            _dataController.then((value) => value.getActiveCategories()),
           ]),
           initialValues: from,
         ),
@@ -106,16 +110,21 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _onNewData() async {
+    IncompleteTransaction created = await _inputPage();
+    if (created != null) (await _dataController).addTransaction(created);
+  }
+
   void _onReturn(Transaction transaction) async {
-    //TODO sistemare gestione return
+    //TODO fix returns
   }
 
   void _onModify(Transaction transaction) async {
     var created = await _inputPage(transaction);
     if (created != null) {
-      DataInterface().updateTransaction(
+      (await _dataController).updateTransaction(
         old: transaction,
-        newTransaction: created,
+        newTransaction: created.complete(transaction.id),
       );
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     }
@@ -126,7 +135,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).confirmationTitle),
+        title: Text(AppLocalizations.of(context).confirmationMessage),
         content: Text(AppLocalizations.of(context).deleteMessage),
         actions: <Widget>[
           FlatButton(
@@ -142,29 +151,46 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
       ),
     );
     if (confirm) {
-      DataInterface().removeTransaction(transaction);
+      (await _dataController).removeTransaction(transaction);
       Navigator.of(context).popUntil(ModalRoute.withName('/'));
     }
   }
 
   void _onEntity() {
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => EntityPage(
-              entitiesCallback: () => DataInterface().getAllEntities(),
-              modifiedEntityCallback: (oldE, newE) =>
-                  DataInterface().updateEntity(old: oldE, newEntity: newE),
-              newEntityCallback: (entity) => DataInterface().addEntity(entity),
+        builder: (context) => FutureBuilder<DataController>(
+              future: _dataController,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return EntityPage(
+                    entitiesCallback: () => snapshot.data.getAllEntities(),
+                    modifiedEntityCallback: (oldE, newE) =>
+                        snapshot.data.updateEntity(old: oldE, newEntity: newE),
+                    newEntityCallback: (entity) =>
+                        snapshot.data.addEntity(entity),
+                  );
+                }
+                return const CircularProgressIndicator();
+              },
             )));
   }
 
   void _onCategory() {
     Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => CategoryPage(
-              categoriesCallback: () => DataInterface().getAllCategories(),
-              modifiedCategoryCallback: (oldC, newC) =>
-                  DataInterface().updateCategory(old: oldC, newCategory: newC),
-              newCategoryCallback: (category) =>
-                  DataInterface().addCategory(category),
+        builder: (context) => FutureBuilder<DataController>(
+              future: _dataController,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return CategoryPage(
+                    categoriesCallback: () => snapshot.data.getAllCategories(),
+                    modifiedCategoryCallback: (oldE, newE) => snapshot.data
+                        .updateCategory(old: oldE, newCategory: newE),
+                    newCategoryCallback: (entity) =>
+                        snapshot.data.addCategory(entity),
+                  );
+                }
+                return const CircularProgressIndicator();
+              },
             )));
   }
 }

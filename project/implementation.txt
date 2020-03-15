@@ -35,8 +35,14 @@ statistics:
 
 
 road map:
-	frontend (update backend specifications when necessary)
-        settings
-        statistics
-	backend (google drive?) and serialization (db? vs text)
-	UI (details)
+    basic statistics
+    backup
+    fix returns
+
+    theme
+    translation
+    settings
+
+    other statistics
+
+

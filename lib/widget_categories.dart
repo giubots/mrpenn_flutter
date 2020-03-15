@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'localization/localization.dart';
 import 'model.dart';
 
+/// Page for adding a category.
 class NewCategory extends StatefulWidget {
   final Future<Set<String>> usedNames;
   final Category initialValue;
 
-  NewCategory({
+  const NewCategory({
     Key key,
     @required this.usedNames,
     this.initialValue,
@@ -114,13 +115,14 @@ class _NewCategoryState extends State<NewCategory> {
   }
 }
 
+/// Page to display the categories.
 class CategoryPage extends StatefulWidget {
   final Future<List<Category>> Function() categoriesCallback;
   final Future<void> Function(Category category) newCategoryCallback;
   final Future<void> Function(Category oldC, Category newC)
       modifiedCategoryCallback;
 
-  CategoryPage({
+  const CategoryPage({
     Key key,
     @required this.categoriesCallback,
     @required this.newCategoryCallback,
@@ -147,7 +149,7 @@ class _CategoryPageState extends State<CategoryPage> {
         title: Text(AppLocalizations.of(context).categoryLabel),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: _onAddCategory,
           )
         ],
@@ -162,13 +164,15 @@ class _CategoryPageState extends State<CategoryPage> {
               itemBuilder: (context, index) => ListTile(
                 title: Text(snapshot.data[index].name),
                 trailing: IconButton(
-                  icon: Icon(Icons.mode_edit),
+                  icon: const Icon(Icons.mode_edit),
                   onPressed: () => _onModify(snapshot.data[index]),
                 ),
               ),
             );
           }
-          return const Center(child: const CircularProgressIndicator(),);
+          return const Center(
+            child: const CircularProgressIndicator(),
+          );
         },
       ),
     );

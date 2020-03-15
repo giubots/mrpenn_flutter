@@ -4,11 +4,12 @@ import 'package:flutter/services.dart';
 import 'localization/localization.dart';
 import 'model.dart';
 
+/// Page for adding an entity.
 class NewEntity extends StatefulWidget {
   final Future<Set<String>> usedNames;
   final Entity initialValue;
 
-  NewEntity({
+  const NewEntity({
     Key key,
     @required this.usedNames,
     this.initialValue,
@@ -131,12 +132,13 @@ class _NewEntityState extends State<NewEntity> {
   }
 }
 
+/// Page to display the entities.
 class EntityPage extends StatefulWidget {
   final Future<List<Entity>> Function() entitiesCallback;
   final Future<void> Function(Entity entity) newEntityCallback;
   final Future<void> Function(Entity oldE, Entity newE) modifiedEntityCallback;
 
-  EntityPage({
+  const EntityPage({
     Key key,
     @required this.entitiesCallback,
     @required this.newEntityCallback,
@@ -163,7 +165,7 @@ class _EntityPageState extends State<EntityPage> {
         title: Text(AppLocalizations.of(context).entityLabel),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: _onAddCategory,
           )
         ],
@@ -178,7 +180,7 @@ class _EntityPageState extends State<EntityPage> {
               itemBuilder: (context, index) => ListTile(
                 title: Text(snapshot.data[index].name),
                 trailing: IconButton(
-                  icon: Icon(Icons.mode_edit),
+                  icon: const Icon(Icons.mode_edit),
                   onPressed: () => _onModify(snapshot.data[index]),
                 ),
               ),

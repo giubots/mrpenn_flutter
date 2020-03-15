@@ -21,7 +21,12 @@ class AppLocalizations {
   static AppLocalizations of(BuildContext context) =>
       Localizations.of<AppLocalizations>(context, AppLocalizations);
 
-  String get confirmationTitle {
+  // ###########################################################################
+  // Messages and their labels
+  // ###########################################################################
+
+  // Elimination confirmation
+  String get confirmationMessage {
     return Intl.message(
       'Are you sure?',
       desc: 'Title for the message dialog that asks confirmation',
@@ -37,6 +42,7 @@ class AppLocalizations {
     );
   }
 
+  // Generic
   String get confirmLabel {
     return Intl.message(
       'Yes',
@@ -52,6 +58,18 @@ class AppLocalizations {
       locale: localeName,
     );
   }
+
+  String get submitLabel {
+    return Intl.message(
+      'Submit',
+      desc: 'Label for the button that submits the contsnts',
+      locale: localeName,
+    );
+  }
+
+  // ###########################################################################
+  // Titles
+  // ###########################################################################
 
   String get homeTitle {
     return Intl.message(
@@ -101,6 +119,11 @@ class AppLocalizations {
     );
   }
 
+  // ###########################################################################
+  // Labels
+  // ###########################################################################
+
+  // Transaction labels
   String get titleLabel {
     return Intl.message(
       'Title',
@@ -149,14 +172,6 @@ class AppLocalizations {
     );
   }
 
-  String get chooseCategoryLabel {
-    return Intl.message(
-      'Select categories...',
-      desc: 'Label that asks to select some categories for the transaction',
-      locale: localeName,
-    );
-  }
-
   String get dateLabel {
     return Intl.message(
       'Date',
@@ -181,19 +196,20 @@ class AppLocalizations {
     );
   }
 
+  String get returningLabel {
+    return Intl.message(
+      'Returning transaction',
+      desc: 'Label for the field that contains the transaction to be returned',
+      locale: localeName,
+    );
+  }
+
+  // Transaction: others
   String get toReturnShortLabel {
     return Intl.message(
       'To return',
       desc:
           'Label indicating whether the transaction must be returned in few words',
-      locale: localeName,
-    );
-  }
-
-  String get returningLabel {
-    return Intl.message(
-      'Returning transaction',
-      desc: 'Label for the field that contains the transaction to be returned',
       locale: localeName,
     );
   }
@@ -206,14 +222,7 @@ class AppLocalizations {
     );
   }
 
-  String get submitLabel {
-    return Intl.message(
-      'Submit',
-      desc: 'Label for the button that saves the new transaction',
-      locale: localeName,
-    );
-  }
-
+  // Entity and Category labels
   String get nameLabel {
     return Intl.message(
       'Name',
@@ -262,6 +271,10 @@ class AppLocalizations {
       locale: localeName,
     );
   }
+
+  // ###########################################################################
+  // Error messages
+  // ###########################################################################
 
   String get amountError {
     return Intl.message(
