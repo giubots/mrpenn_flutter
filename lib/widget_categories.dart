@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'data/model.dart';
 import 'localization/localization.dart';
-import 'model.dart';
 
 /// Page for adding a category.
 class NewCategory extends StatefulWidget {

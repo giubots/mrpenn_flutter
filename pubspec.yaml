@@ -13,6 +13,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
+  # The following allows to sign up and save data to google drive.
+  googleapis_auth: ^0.2.11+1
+  google_sign_in: ^4.1.4
+  googleapis: ^0.54.0
+
+
   # The following allows to use an sql database.
   sqflite:
 

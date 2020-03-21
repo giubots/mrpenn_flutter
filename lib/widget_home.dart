@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:mrpenn_flutter/controller_data.dart';
-import 'package:mrpenn_flutter/widget_categories.dart';
-import 'package:mrpenn_flutter/widget_entities.dart';
 
+import 'data/controller_data.dart';
+import 'data/model.dart';
 import 'localization/localization.dart';
-import 'model.dart';
+import 'widget_categories.dart';
+import 'widget_entities.dart';
 import 'widget_transactions.dart';
 
 class Home extends StatefulWidget {

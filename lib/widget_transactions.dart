@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import 'data/model.dart';
 import 'localization/localization.dart';
-import 'model.dart';
 
 /// The format to display the dates.
 final _dateFormatter = DateFormat('dd/MM/yyyy');
@@ -138,7 +138,7 @@ class _TransactionFormState extends State<_TransactionForm> {
             initialValue: _title,
             decoration: InputDecoration(
                 labelText: AppLocalizations.of(context).titleLabel),
-            validator: (value) => value.isEmpty //TODO add maximum length?
+            validator: (value) => value.isEmpty
                 ? AppLocalizations.of(context).emptyFieldError
                 : null,
             onSaved: (newValue) => _title = newValue,
@@ -207,15 +207,15 @@ class _TransactionFormState extends State<_TransactionForm> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       widget.onSubmit(IncompleteTransaction(
-              title: _title,
-              amount: _amount,
-              originEntity: _originEntity,
-              destinationEntity: _destinationEntity,
-              categories: _selectedCategories,
-              dateTime: _dateTime,
-              notes: _notes,
-              toReturn: _toReturn,
-              returnId: _toReturn ? widget?.initialValues?.returnId : null));
+          title: _title,
+          amount: _amount,
+          originEntity: _originEntity,
+          destinationEntity: _destinationEntity,
+          categories: _selectedCategories,
+          dateTime: _dateTime,
+          notes: _notes,
+          toReturn: _toReturn,
+          returnId: _toReturn ? widget?.initialValues?.returnId : null));
     }
   }
 }

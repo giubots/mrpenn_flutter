@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'data/model.dart';
 import 'localization/localization.dart';
-import 'model.dart';
 
 /// Page for adding an entity.
 class NewEntity extends StatefulWidget {

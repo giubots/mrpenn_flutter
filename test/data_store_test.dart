@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mrpenn_flutter/adapter_data.dart';
-import 'package:mrpenn_flutter/model.dart';
+import 'file:///C:/Users/Giulio%20Antonio%20Abbo/Documents/gitRepos/mrpenn_flutter/lib/data/adapter_data.dart';
+import 'file:///C:/Users/Giulio%20Antonio%20Abbo/Documents/gitRepos/mrpenn_flutter/lib/data/model.dart';
 
 List<Entity> entityList = [
   Entity(

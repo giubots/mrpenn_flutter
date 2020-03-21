@@ -39,7 +39,7 @@ road map:
     backup
     fix returns
 
-    theme
+    icon and theme
     translation
     settings
 
