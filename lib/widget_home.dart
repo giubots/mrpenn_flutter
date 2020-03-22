@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mrpenn_flutter/data/handler_io.dart';
+import 'package:mrpenn_flutter/widget_hud.dart';
 
 import 'data/controller_data.dart';
 import 'data/model.dart';
@@ -49,6 +51,15 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 title: Text(AppLocalizations.of(context).entityLabel),
                 onTap: _onEntity,
               ),
+              const Divider(),
+              FutureBuilder(
+                future: _dataController,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData)
+                    return TransactionParser(snapshot.data, snapshot.data);
+                  return const CircularProgressIndicator();
+                },
+              ),
             ],
           ),
         ),
@@ -60,14 +71,19 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 return TabBarView(
                   controller: _tabController,
                   children: <Widget>[
-                    Container(child: Text('hi')), //TODO hud
+                    ToolsList(tools: [
+                      EntitySums(data: snapshot.data),
+                      CategorySums(
+                        data: snapshot.data,
+                      )
+                    ]),
                     StreamBuilder<List<Transaction>>(
                       initialData: [],
                       stream: snapshot.data.getStream(),
                       builder: (context, snapshot) {
                         if (snapshot.hasData) {
                           return TransactionList(
-                            elements: snapshot.data,
+                            elements: snapshot.data.reversed.toList(),
                             onReturn: _onReturn,
                             onModify: _onModify,
                             onDelete: _onDelete,

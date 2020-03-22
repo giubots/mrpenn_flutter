@@ -42,7 +42,6 @@ class _NewEntityState extends State<NewEntity> {
           title: Text(AppLocalizations.of(context).newEntityTitle),
           actions: <Widget>[
             FlatButton(
-              textColor: Colors.white, //FIXME colors
               onPressed: () {
                 if (_formKey.currentState.validate()) {
                   _formKey.currentState.save();
@@ -114,17 +113,20 @@ class _NewEntityState extends State<NewEntity> {
           SwitchListTile(
             value: _preferred,
             title: Text(AppLocalizations.of(context).preferredLabel),
-            onChanged: (value) => setState(() => _preferred = !_preferred),
+            onChanged: (value) => setState(() {
+              _preferred = value;
+              _inTotal = value;
+            }),
           ),
           SwitchListTile(
             value: _inTotal,
             title: Text(AppLocalizations.of(context).inTotalLabel),
-            onChanged: (value) => setState(() => _inTotal = !_inTotal),
+            onChanged: (value) => setState(() => _inTotal = _preferred && value),
           ),
           SwitchListTile(
             value: _active,
             title: Text(AppLocalizations.of(context).activeLabel),
-            onChanged: (value) => setState(() => _active = !_active),
+            onChanged: (value) => setState(() => _active = value),
           ),
         ],
       ),

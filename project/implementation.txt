@@ -33,16 +33,14 @@ update transaction:
 statistics:
 	request the data, show it.
 
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 road map:
-    basic statistics
     backup
     fix returns
 
-    icon and theme
-    translation
-    settings
+    settings (bind to tool?)
+    other statistics: temporal graph, bar graph, to refund(page?)
 
-    other statistics
-
+(translation and versioning)
 

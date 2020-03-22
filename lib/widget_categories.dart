@@ -40,7 +40,6 @@ class _NewCategoryState extends State<NewCategory> {
           title: Text(AppLocalizations.of(context).newCategoryTitle),
           actions: <Widget>[
             FlatButton(
-              textColor: Colors.white, //FIXME colors
               onPressed: () {
                 if (_formKey.currentState.validate()) {
                   _formKey.currentState.save();

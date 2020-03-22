@@ -11,7 +11,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Mr Penn',
-      theme: ThemeData.light(),
+      theme: ThemeData(
+        brightness: Brightness.light,
+        primarySwatch: Colors.lightBlue,
+        accentColor: Colors.orangeAccent,
+      ),
       initialRoute: '/',
       routes: {
         '/': (context) => const Home(),
@@ -24,7 +28,7 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: [
         const Locale('en'),
-        //const Locale('it'),//TODO translation
+        const Locale('it'),
       ],
     );
   }

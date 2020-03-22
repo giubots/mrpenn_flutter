@@ -11,8 +11,9 @@ class AppLocalizations {
   const AppLocalizations(this.localeName);
 
   static Future<AppLocalizations> load(Locale locale) {
-    final String name =
-        locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
+    final String name = (locale.countryCode?.isEmpty ?? true)
+        ? locale.languageCode
+        : locale.toString();
     final String localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName)
         .then((_) => AppLocalizations(localeName));
@@ -115,6 +116,23 @@ class AppLocalizations {
     return Intl.message(
       'New Entity',
       desc: 'Title for the new entity page',
+      locale: localeName,
+    );
+  }
+
+  // Tools titles
+  String get entitySumsTitle {
+    return Intl.message(
+      'Entities recap',
+      desc: 'Title for the tool that shows the sums of the entities',
+      locale: localeName,
+    );
+  }
+
+  String get categorySumsTitle {
+    return Intl.message(
+      'Categories recap',
+      desc: 'Title for the tool that shows the sums of the categories',
       locale: localeName,
     );
   }
@@ -272,6 +290,39 @@ class AppLocalizations {
     );
   }
 
+  // Tools labels
+  String get totalLabel {
+    return Intl.message(
+      'Total',
+      desc: 'Label for the table field containing the totals',
+      locale: localeName,
+    );
+  }
+
+  String get untilNowLabel {
+    return Intl.message(
+      'Until now',
+      desc: 'Label that indicates the elements until now',
+      locale: localeName,
+    );
+  }
+
+  String get thisMonthLabel {
+    return Intl.message(
+      'This month',
+      desc: 'Label that indicates the elements of this month',
+      locale: localeName,
+    );
+  }
+
+  String get lastMonthLabel {
+    return Intl.message(
+      'Last month',
+      desc: 'Label that indicates the elements of last month',
+      locale: localeName,
+    );
+  }
+
   // ###########################################################################
   // Error messages
   // ###########################################################################
@@ -337,12 +388,12 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['en', 'it'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) {
-    return Future.value(AppLocalizations('en'));
-    //return AppLocalizations.load(locale);
+    assert(locale != null);
+    return AppLocalizations.load(locale);
   }
 
   @override

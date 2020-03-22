@@ -40,7 +40,6 @@ class NewData extends StatelessWidget {
           title: Text(AppLocalizations.of(context).newDataTitle),
           actions: <Widget>[
             FlatButton(
-              textColor: Colors.white, //FIXME colors
               onPressed: () => _validationKey.currentState._onSubmit(),
               child:
                   Text(AppLocalizations.of(context).submitLabel.toUpperCase()),

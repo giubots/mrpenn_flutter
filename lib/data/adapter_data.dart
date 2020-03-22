@@ -186,6 +186,13 @@ class SqfliteAdapter {
       whereArgs: [SerializedTransaction.fromTransaction(toRemove).id],
     );
   }
+  /// Removes all the transactions from the database.
+  Future<void> removeAllTransactions() async {
+    await (await _database).delete(
+      _transactionsTable,
+    );
+  }
+
 
   /// Updates a transaction in the database.
   Future<void> updateTransaction(model.Transaction toUpdate) async {
@@ -198,6 +205,18 @@ class SqfliteAdapter {
       whereArgs: [ser.id],
     );
   }
+
+  /// Returns all the transaction after [since] and up to [until] excluded.
+  Future<List<model.Transaction>> getTransactionsInRange(
+          DateTime since, DateTime until) async =>
+      (await _database).query(
+        _transactionsTable,
+        where: '$_dateTimeLabel >= ? and $_dateTimeLabel < ?',
+        whereArgs: [since.microsecondsSinceEpoch, until.microsecondsSinceEpoch],
+      ).then((value) => value
+          .map(
+              (e) => SerializedTransaction.fromJson(e).toTransaction(_provider))
+          .toList());
 }
 
 /// A mixin that provides the instance of an entity or category given its name.
