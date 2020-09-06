@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 
@@ -63,7 +64,12 @@ abstract class DataController {
   /// Returns a map with data for each preferred category.
   Future<Map<Category, CategoryTableRow>> getPrefCategoriesData();
 
+  /// Removes all the transactions from the database.
   Future<void> removeAll();
+
+  Future<void> export();
+
+  Future<void> import(String source);
 }
 
 /// A triplet of num elements: the total, the month and previous mont partials.
@@ -285,6 +291,21 @@ class _SqlData extends DataController with InstanceProvider {
     await _database.removeAllTransactions();
     _transactions = await _database.getTransactions();
     _streamController.sink.add(_transactions);
+  }
+
+  @override
+  Future<void> export() async {
+    await _database.dispose();
+    await _database.export();
+    return _setup();
+  }
+
+  @override
+  Future<void> import(String source) async {
+    await _database.dispose();
+    await _database.import(source);
+    sleep(Duration(milliseconds: 10));
+    return _setup();
   }
 }
 

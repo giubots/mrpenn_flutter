@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'model.dart' as model;
@@ -87,6 +88,13 @@ class SqfliteAdapter {
 
   /// Closes the database.
   Future<void> dispose() async => (await _database).close();
+
+  Future<void> export() async =>
+      File(join(await getDatabasesPath(), 'mrPenn_data.db'))
+          .copy(join((await getExternalStorageDirectory()).path, 'mrPenn_data.db'));
+
+  Future<void> import(String source) async =>
+      File(source).copy(join(await getDatabasesPath(), 'mrPenn_data.db'));
 
   /// Returns all the entities in the database.
   Future<Set<model.Entity>> getEntities() async =>
@@ -186,13 +194,13 @@ class SqfliteAdapter {
       whereArgs: [SerializedTransaction.fromTransaction(toRemove).id],
     );
   }
+
   /// Removes all the transactions from the database.
   Future<void> removeAllTransactions() async {
     await (await _database).delete(
       _transactionsTable,
     );
   }
-
 
   /// Updates a transaction in the database.
   Future<void> updateTransaction(model.Transaction toUpdate) async {

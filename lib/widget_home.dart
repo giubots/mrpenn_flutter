@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mrpenn_flutter/data/handler_io.dart';
 import 'package:mrpenn_flutter/widget_hud.dart';
@@ -57,6 +58,25 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                 builder: (context, snapshot) {
                   if (snapshot.hasData)
                     return TransactionParser(snapshot.data, snapshot.data);
+                  return const CircularProgressIndicator();
+                },
+              ),
+              FutureBuilder(
+                future: _dataController,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData)
+                    return Column(
+                      children: [
+                        TextButton(
+                          onPressed: () async => (await _dataController).export(),
+                          child: Text("export"),
+                        ),
+                        TextButton(
+                          onPressed: () async => (await _dataController).import(await FilePicker.getFilePath()),
+                          child: Text("import"),
+                        )
+                      ],
+                    );
                   return const CircularProgressIndicator();
                 },
               ),

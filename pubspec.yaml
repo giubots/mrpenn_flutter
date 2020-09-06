@@ -2,7 +2,7 @@ name: mrpenn_flutter
 description: MrPenn flutter app.
 
 # The following defines the version and build number for your application.
-version: 1.0.0+1
+version: 1.0.1
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -24,6 +24,8 @@ dependencies:
 
   # The following allows to handle paths.
   path:
+  file_picker: ^1.13.3
+  path_provider: ^1.6.14
 
   # The following allows internationalization.
   intl: ^0.16.1
