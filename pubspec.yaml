@@ -28,7 +28,7 @@ dependencies:
   path_provider: ^1.6.14
 
   # The following allows internationalization.
-  intl: ^0.16.1
+  intl:
 
   # The following adds the Cupertino Icons font to your application.
   cupertino_icons: ^0.1.2
@@ -41,9 +41,6 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # For building the translation files.
-  intl_translation: ^0.17.9
 
   # For building the json code.
   json_serializable: ^3.2.5
