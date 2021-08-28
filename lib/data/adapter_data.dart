@@ -44,8 +44,7 @@ class SqfliteAdapter {
   ///
   /// Remember to [dispose].
   SqfliteAdapter(InstanceProvider provider)
-      : assert(provider != null),
-        _provider = provider,
+      : _provider = provider,
         _database = getDatabasesPath().then((databasesPath) =>
             Directory(databasesPath)
                 .create(recursive: true)
@@ -90,8 +89,8 @@ class SqfliteAdapter {
   Future<void> dispose() async => (await _database).close();
 
   Future<void> export() async =>
-      File(join(await getDatabasesPath(), 'mrPenn_data.db'))
-          .copy(join((await getExternalStorageDirectory()).path, 'mrPenn_data.db'));
+      File(join(await getDatabasesPath(), 'mrPenn_data.db')).copy(
+          join((await getExternalStorageDirectory())!.path, 'mrPenn_data.db'));
 
   Future<void> import(String source) async =>
       File(source).copy(join(await getDatabasesPath(), 'mrPenn_data.db'));
@@ -103,7 +102,6 @@ class SqfliteAdapter {
 
   /// Adds an entity to the database
   Future<void> addEntity(model.Entity toAdd) async {
-    assert(toAdd != null);
     await (await _database).insert(
       _entitiesTable,
       SerializedEntity.fromEntity(toAdd).toJson(),
@@ -112,7 +110,6 @@ class SqfliteAdapter {
 
   /// Removes an entity in the database
   Future<void> removeEntity(model.Entity toRemove) async {
-    assert(toRemove != null);
     await (await _database).delete(
       _entitiesTable,
       where: '$_nameLabel = ?',
@@ -122,7 +119,6 @@ class SqfliteAdapter {
 
   /// Updates an entity in the database
   Future<void> updateEntity(model.Entity toUpdate) async {
-    assert(toUpdate != null);
     var ser = SerializedEntity.fromEntity(toUpdate);
     await (await _database).update(
       _entitiesTable,
@@ -140,7 +136,6 @@ class SqfliteAdapter {
 
   /// Adds a category to the database
   Future<void> addCategory(model.Category toAdd) async {
-    assert(toAdd != null);
     await (await _database).insert(
       _categoriesTable,
       SerializedCategory.fromCategory(toAdd).toJson(),
@@ -149,7 +144,6 @@ class SqfliteAdapter {
 
   /// Removes a category in the database
   Future<void> removeCategory(model.Category toRemove) async {
-    assert(toRemove != null);
     await (await _database).delete(
       _categoriesTable,
       where: '$_nameLabel = ?',
@@ -159,7 +153,6 @@ class SqfliteAdapter {
 
   /// Updates a category in the database
   Future<void> updateCategory(model.Category toUpdate) async {
-    assert(toUpdate != null);
     var ser = SerializedCategory.fromCategory(toUpdate);
     await (await _database).update(
       _categoriesTable,
@@ -178,7 +171,6 @@ class SqfliteAdapter {
 
   /// Adds a transaction to the database
   Future<void> addTransaction(model.Transaction toAdd) async {
-    assert(toAdd != null);
     await (await _database).insert(
       _transactionsTable,
       SerializedTransaction.fromTransaction(toAdd).toJson(),
@@ -187,7 +179,6 @@ class SqfliteAdapter {
 
   /// Removes a transaction from the database.
   Future<void> removeTransaction(model.Transaction toRemove) async {
-    assert(toRemove != null);
     await (await _database).delete(
       _transactionsTable,
       where: '$_idLabel = ?',
@@ -204,7 +195,6 @@ class SqfliteAdapter {
 
   /// Updates a transaction in the database.
   Future<void> updateTransaction(model.Transaction toUpdate) async {
-    assert(toUpdate != null);
     var ser = SerializedTransaction.fromTransaction(toUpdate);
     await (await _database).update(
       _transactionsTable,
@@ -254,11 +244,10 @@ class SerializedTransaction {
   final int toReturn;
   final int dateTime;
   final String notes;
-  final int returnId;
+  final int? returnId;
 
   SerializedTransaction.fromTransaction(model.Transaction from)
-      : assert(from != null),
-        title = from.title,
+      : title = from.title,
         id = from.id,
         amount = from.amount,
         originEntityId = from.originEntity.name,
@@ -286,8 +275,7 @@ class SerializedTransaction {
       );
 
   SerializedTransaction.fromJson(Map<String, dynamic> map)
-      : assert(map != null),
-        title = map[_titleLabel],
+      : title = map[_titleLabel],
         id = map[_idLabel],
         amount = map[_amountLabel],
         originEntityId = map[_originEntityIdLabel],
@@ -322,8 +310,7 @@ class SerializedEntity {
   final int inTotal;
 
   SerializedEntity.fromEntity(model.Entity from)
-      : assert(from != null),
-        name = from.name,
+      : name = from.name,
         active = from.active ? 1 : 0,
         preferred = from.preferred ? 1 : 0,
         initialValue = from.initialValue,
@@ -333,13 +320,12 @@ class SerializedEntity {
         name: name,
         active: active == 1,
         preferred: preferred == 1,
-        initialValue: initialValue,
+        initialValue: initialValue.toDouble(),
         inTotal: inTotal == 1,
       );
 
   SerializedEntity.fromJson(Map<String, dynamic> map)
-      : assert(map != null),
-        name = map[_nameLabel],
+      : name = map[_nameLabel],
         active = map[_activeLabel],
         preferred = map[_preferredLabel],
         initialValue = map[_initialValueLabel],
@@ -363,8 +349,7 @@ class SerializedCategory {
   final int positive;
 
   SerializedCategory.fromCategory(model.Category from)
-      : assert(from != null),
-        name = from.name,
+      : name = from.name,
         active = from.active ? 1 : 0,
         preferred = from.preferred ? 1 : 0,
         positive = from.positive ? 1 : 0;
@@ -377,8 +362,7 @@ class SerializedCategory {
       );
 
   SerializedCategory.fromJson(Map<String, dynamic> map)
-      : assert(map != null),
-        name = map[_nameLabel],
+      : name = map[_nameLabel],
         active = map[_activeLabel],
         preferred = map[_preferredLabel],
         positive = map[_positiveLabel];

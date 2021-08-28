@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-
 import 'adapter_data.dart';
 import 'model.dart';
 
@@ -34,13 +32,13 @@ abstract class DataController {
 
   /// Updates the specified category.
   Future<void> updateCategory(
-      {@required Category old, @required Category newCategory});
+      {required Category old, required Category newCategory});
 
   /// Adds the specified category.
   Future<void> addEntity(Entity entity);
 
   /// Updates the specified category.
-  Future<void> updateEntity({@required Entity old, @required Entity newEntity});
+  Future<void> updateEntity({required Entity old, required Entity newEntity});
 
   /// Returns a stream with the transaction snapshots.
   Stream<List<Transaction>> getStream();
@@ -53,7 +51,7 @@ abstract class DataController {
 
   /// Updates a transaction and where it is referenced.
   Future<void> updateTransaction(
-      {@required Transaction old, @required Transaction newTransaction});
+      {required Transaction old, required Transaction newTransaction});
 
   /// Disposes of the resources associated with this.
   Future<void> dispose();
@@ -79,9 +77,9 @@ class EntityTableRow {
   final num previousMonth;
 
   EntityTableRow({
-    @required this.total,
-    @required this.thisMonth,
-    @required this.previousMonth,
+    required this.total,
+    required this.thisMonth,
+    required this.previousMonth,
   });
 }
 
@@ -91,27 +89,27 @@ class CategoryTableRow {
   final num previousMonth;
 
   CategoryTableRow({
-    @required this.thisMonth,
-    @required this.previousMonth,
+    required this.thisMonth,
+    required this.previousMonth,
   });
 }
 
 /// A data controller that uses a sql database.
 class _SqlData extends DataController with InstanceProvider {
   /// The database for this instance.
-  SqfliteAdapter _database;
+  late SqfliteAdapter _database;
 
   /// A stream controller to provide transactions.
-  StreamController<List<Transaction>> _streamController;
+  late StreamController<List<Transaction>> _streamController;
 
   /// A local copy of the categories in the database.
-  Set<Category> _categories;
+  late Set<Category> _categories;
 
   /// A local copy of the entities in the database.
-  Set<Entity> _entities;
+  late Set<Entity> _entities;
 
   /// A local copy of the transactions in the database.
-  List<Transaction> _transactions;
+  late List<Transaction> _transactions;
 
   /// Initializes this.
   Future<void> _setup() async {
@@ -136,7 +134,6 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<void> addTransaction(IncompleteTransaction toAdd) async {
-    assert(toAdd != null);
     await _database.addTransaction(toAdd.complete(getId()));
     _transactions = await _database.getTransactions();
     _streamController.sink.add(_transactions);
@@ -144,8 +141,7 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<void> updateTransaction(
-      {Transaction old, Transaction newTransaction}) async {
-    assert(old != null && newTransaction != null);
+      {required Transaction old, required Transaction newTransaction}) async {
     assert(old.id == newTransaction.id);
     if (old != newTransaction) {
       await _database.updateTransaction(newTransaction);
@@ -156,7 +152,6 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<void> removeTransaction(Transaction toRemove) async {
-    assert(toRemove != null);
     await _database.removeTransaction(toRemove);
     _transactions = await _database.getTransactions();
     _streamController.sink.add(_transactions);
@@ -171,14 +166,13 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<void> addCategory(Category category) async {
-    assert(category != null);
     await _database.addCategory(category);
     _categories = await _database.getCategories();
   }
 
   @override
-  Future<void> updateCategory({Category old, Category newCategory}) async {
-    assert(old != null && newCategory != null);
+  Future<void> updateCategory(
+      {required Category old, required Category newCategory}) async {
     assert(old.name == newCategory.name);
     if (old != newCategory) {
       await _database.updateCategory(newCategory);
@@ -195,14 +189,13 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<void> addEntity(Entity entity) async {
-    assert(entity != null);
     await _database.addEntity(entity);
     _entities = await _database.getEntities();
   }
 
   @override
-  Future<void> updateEntity({Entity old, Entity newEntity}) async {
-    assert(old != null && newEntity != null);
+  Future<void> updateEntity(
+      {required Entity old, required Entity newEntity}) async {
     assert(old.name == newEntity.name);
     if (old != newEntity) {
       await _database.updateEntity(newEntity);
@@ -212,13 +205,11 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Category getCategory(String name) {
-    assert(name != null);
     return _categories.firstWhere((element) => element.name == name);
   }
 
   @override
   Entity getEntity(String name) {
-    assert(name != null);
     return _entities.firstWhere((element) => element.name == name);
   }
 
