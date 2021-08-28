@@ -1,4 +1,15 @@
 {
   "dashboard": "Dashboard",
-  "list": "List"
+  "list": "List",
+  "newTransaction": "New transaction",
+  "description": "Description",
+  "amount": "Amount",
+  "origin": "Origin",
+  "destination": "Destination",
+  "category": "Category",
+  "date": "Date",
+  "notes": "Notes",
+  "toReturn": "To return",
+  "emptyFieldErr": "This field can not be empty",
+  "amountErr": "The amount is not valid"
 }
