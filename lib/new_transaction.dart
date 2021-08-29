@@ -47,14 +47,17 @@ class _NewTransactionState extends State<NewTransaction> {
             future: entities,
             builder: (context, snapshotE) {
               if (snapshotC.hasData && snapshotE.hasData) {
-                return SingleChildScrollView(
-                  child: _NewTransactionForm(
-                    key: widget.validationKey,
-                    initialData: widget.initialData,
-                    availableCategories: snapshotC.data!,
-                    availableEntities: snapshotE.data!,
-                    onSubmit: onSave,
-                  ),
+                return ListView(
+                  children: [
+                    const Placeholder(fallbackHeight: 200),
+                    _NewTransactionForm(
+                      key: widget.validationKey,
+                      initialData: widget.initialData,
+                      availableCategories: snapshotC.data!,
+                      availableEntities: snapshotE.data!,
+                      onSubmit: onSave,
+                    ),
+                  ],
                 );
               }
               return Center(child: CircularProgressIndicator());
@@ -63,7 +66,7 @@ class _NewTransactionState extends State<NewTransaction> {
         },
       ),
       bottomNavigationBar: RoundBottomAppBar(
-        title: Text(local(context).newTransaction),
+        title: Center(child: Text(local(context).newTransaction)),
         actions: [IconButton(icon: Icon(Icons.done), onPressed: onValidate)],
       ),
     );
@@ -75,6 +78,7 @@ class _NewTransactionState extends State<NewTransaction> {
 
   void onSave(IncompleteTransaction transaction) {
     //TODO implement
+    print(transaction.toString());
     Navigator.pop(context);
   }
 }
@@ -132,72 +136,128 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
   @override
   Widget build(BuildContext context) {
     final entityButtons = widget.availableEntities.map((e) {
-      return DropdownMenuItem(
-        value: e,
-        child: Text(e.name),
-      );
+      return DropdownMenuItem(value: e, child: Text(e.name));
     }).toList();
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Form(
       key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          TextFormField(
-            initialValue: _title,
-            decoration: InputDecoration(labelText: local(context).description),
-            validator: (value) =>
-                (value?.isEmpty ?? true) ? local(context).emptyFieldErr : null,
-            onSaved: (newValue) => _title = newValue,
+        children: [
+          ListTile(title: Text(local(context).describeTheTransaction)),
+          ListTile(
+            leading: Icon(Icons.attach_money),
+            title: TextFormField(
+              initialValue: _amount?.toString(),
+              keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
+              ],
+              decoration: InputDecoration(hintText: local(context).amount),
+              validator: (value) => (double.tryParse(value ?? "-1") ?? -1) < 0
+                  ? local(context).amountErr
+                  : null,
+              onSaved: (newValue) => _amount = double.parse(newValue!),
+            ),
           ),
-          TextFormField(
-            initialValue: _amount?.toString(),
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
-            ],
-            decoration: InputDecoration(labelText: local(context).amount),
-            validator: (value) => (double.tryParse(value ?? "-1") ?? -1) < 0
-                ? local(context).amountErr
-                : null,
-            onSaved: (newValue) => _amount = double.parse(newValue!),
+          ListTile(
+            leading: Icon(Icons.edit),
+            title: TextFormField(
+              initialValue: _title,
+              decoration: InputDecoration(hintText: local(context).description),
+              validator: (value) => (value?.isEmpty ?? true)
+                  ? local(context).emptyFieldErr
+                  : null,
+              onSaved: (newValue) => _title = newValue,
+            ),
           ),
-          DropdownButtonFormField<Entity>(
-            value: _originEntity,
-            items: entityButtons,
-            decoration: InputDecoration(labelText: local(context).origin),
-            validator: (value) => _notNullValidator(context, value),
-            onChanged: (value) => null,
-            onSaved: (newValue) => _originEntity = newValue,
+          const Padding(padding: const EdgeInsets.only(top: 20)),
+          const Divider(),
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  flex: 4,
+                  child: DropdownButtonFormField<Entity>(
+                    value: _originEntity,
+                    items: entityButtons,
+                    decoration: InputDecoration(
+                      hintText: local(context).origin,
+                      border: UnderlineInputBorder(borderSide: BorderSide.none),
+                    ),
+                    validator: (value) => _notNullValidator(context, value),
+                    onChanged: (value) => null,
+                    onSaved: (newValue) => _originEntity = newValue,
+                  ),
+                ),
+                const Padding(padding: const EdgeInsets.only(left: 10)),
+                Flexible(
+                  flex: 1,
+                  child: Ink(
+                    decoration: ShapeDecoration(
+                      color: colorScheme.secondary,
+                      shape: CircleBorder(),
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.double_arrow),
+                      onPressed: () => '',
+                    ),
+                  ),
+                ),
+                const Padding(padding: const EdgeInsets.only(left: 12)),
+                Flexible(
+                  flex: 4,
+                  child: DropdownButtonFormField<Entity>(
+                    value: _destinationEntity,
+                    items: entityButtons,
+                    decoration: InputDecoration(
+                        hintText: local(context).destination,
+                        border:
+                            UnderlineInputBorder(borderSide: BorderSide.none)),
+                    validator: (value) => _notNullValidator(context, value),
+                    onChanged: (value) => null,
+                    onSaved: (newValue) => _destinationEntity = newValue,
+                  ),
+                ),
+              ],
+            ),
           ),
-          DropdownButtonFormField<Entity>(
-            value: _destinationEntity,
-            items: entityButtons,
-            decoration: InputDecoration(labelText: local(context).destination),
-            validator: (value) => _notNullValidator(context, value),
-            onChanged: (value) => null,
-            onSaved: (newValue) => _destinationEntity = newValue,
+          const Divider(),
+          ListTile(
+            leading: Icon(Icons.category),
+            title: DropdownAndChipsFormField<Category>(
+              initialValue: _selectedCategories,
+              nameBuilder: (element) => element.name,
+              labelText: local(context).category,
+              items: widget.availableCategories,
+              onSaved: (newValue) => _selectedCategories = newValue,
+            ),
           ),
-          DropdownAndChipsFormField<Category>(
-            initialValue: _selectedCategories,
-            nameBuilder: (element) => element.name,
-            labelText: local(context).category,
-            items: widget.availableCategories,
-            onSaved: (newValue) => _selectedCategories = newValue,
+          ListTile(
+            leading: Icon(Icons.calendar_today),
+            title: DateTimePicker(
+              type: DateTimePickerType.date,
+              dateHintText: local(context).date,
+              initialDate: _dateTime,
+              initialValue: dateFormatter.format(_dateTime),
+              onSaved: (newValue) => _dateTime = DateTime.parse(newValue!),
+              firstDate: DateTime(2000),
+              lastDate: DateTime.now(),
+            ),
           ),
-          DateTimePicker(
-            type: DateTimePickerType.date,
-            initialDate: _dateTime,
-            onSaved: (newValue) => _dateTime = DateTime.parse(newValue!),
-            firstDate: DateTime(2000),
-            lastDate: DateTime.now(),
-          ),
-          TextFormField(
-            initialValue: _notes,
-            decoration: InputDecoration(labelText: local(context).notes),
-            onSaved: (newValue) => _notes = newValue,
+          ListTile(
+            leading: Icon(Icons.notes),
+            title: TextFormField(
+              initialValue: _notes,
+              decoration: InputDecoration(labelText: local(context).notes),
+              onSaved: (newValue) => _notes = newValue,
+            ),
           ),
           SwitchListTile(
+            secondary: Icon(Icons.keyboard_return),
+            activeColor: Theme.of(context).colorScheme.secondary,
             value: _toReturn,
             title: Text(local(context).toReturn),
             onChanged: (value) => setState(() => _toReturn = !_toReturn),
