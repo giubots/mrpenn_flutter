@@ -1,13 +1,13 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/helper.dart';
-import 'package:mrpenn_flutter/new_transaction.dart';
+import 'package:mrpenn_flutter/routes/new_transaction.dart';
 import 'package:mrpenn_flutter/widgets/dashboard.dart';
 import 'package:mrpenn_flutter/widgets/transactions_list.dart';
+import 'package:provider/provider.dart';
 import 'package:recycle/helpers.dart';
 import 'package:recycle/round_bottom_tab_bar.dart';
-
-import 'data/controller_data.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -21,23 +21,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   bool visible = true;
   late TabController tabController;
   late PageController pageController;
-  late Future<DataController> dataController;
 
   @override
   void initState() {
     super.initState();
     tabController = TabController(initialIndex: 0, length: 2, vsync: this);
     pageController = PageController(initialPage: index);
-    dataController = DataController.instance();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DataController>(
-      future: dataController,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) return buildScaffold(snapshot.data!);
-        return Center(child: CircularProgressIndicator());
+    return Consumer<DataController>(
+      builder: (context, value, child) {
+        return buildScaffold(value);
       },
     );
   }
@@ -101,17 +97,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() async {
     tabController.dispose();
     pageController.dispose();
-    await (await dataController).dispose();
+    //await (await dataController).dispose();
     super.dispose();
   }
-}
-
-class FadeRoute extends PageRouteBuilder {
-  final Widget page;
-
-  FadeRoute({required this.page})
-      : super(
-            pageBuilder: (_, __, ___) => page,
-            transitionsBuilder: (_, animation, __, child) =>
-                FadeTransition(opacity: animation, child: child));
 }

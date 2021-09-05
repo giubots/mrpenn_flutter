@@ -10,6 +10,7 @@
   "date": "Date",
   "notes": "Notes",
   "toReturn": "To return",
+  "settings": "Settings",
   "describeTheTransaction": "Describe the transaction",
   "openSettings": "Open settings page",
   "emptyFieldErr": "This field can not be empty",

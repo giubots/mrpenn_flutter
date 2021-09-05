@@ -31,8 +31,7 @@ abstract class DataController {
   Future<void> addCategory(Category category);
 
   /// Updates the specified category.
-  Future<void> updateCategory(
-      {required Category old, required Category newCategory});
+  Future<void> updateCategory(Category old, Category newCategory);
 
   /// Adds the specified category.
   Future<void> addEntity(Entity entity);
@@ -171,8 +170,7 @@ class _SqlData extends DataController with InstanceProvider {
   }
 
   @override
-  Future<void> updateCategory(
-      {required Category old, required Category newCategory}) async {
+  Future<void> updateCategory(Category old, Category newCategory) async {
     assert(old.name == newCategory.name);
     if (old != newCategory) {
       await _database.updateCategory(newCategory);

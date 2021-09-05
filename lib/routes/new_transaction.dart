@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
+import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/helper.dart';
 import 'package:recycle/dropdown_chips.dart';
 import 'package:recycle/round_bottom_app_bar.dart';
-
-import 'data/model.dart';
 
 /// The format to display the dates.
 final dateFormatter = DateFormat('dd/MM/yyyy');
@@ -256,7 +255,7 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
             ),
           ),
           SwitchListTile(
-            secondary: Icon(Icons.keyboard_return),
+            secondary: Icon(Icons.replay),
             activeColor: Theme.of(context).colorScheme.secondary,
             value: _toReturn,
             title: Text(local(context).toReturn),

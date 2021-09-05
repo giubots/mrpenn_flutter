@@ -162,8 +162,12 @@ class Transaction extends IncompleteTransaction {
   int get hashCode => super.hashCode ^ id.hashCode;
 }
 
+abstract class NamedElement {
+  String get name;
+}
+
 /// An entity can be a source or destination for transactions.
-class Entity {
+class Entity extends NamedElement {
   /// The name of this.
   final String name;
 
@@ -208,7 +212,7 @@ class Entity {
 }
 
 /// A category for organizing the transactions.
-class Category {
+class Category extends NamedElement {
   /// The name of this.
   final String name;
 
