@@ -37,7 +37,7 @@ abstract class DataController {
   Future<void> addEntity(Entity entity);
 
   /// Updates the specified category.
-  Future<void> updateEntity({required Entity old, required Entity newEntity});
+  Future<void> updateEntity(Entity old, Entity newEntity);
 
   /// Returns a stream with the transaction snapshots.
   Stream<List<Transaction>> getStream();
@@ -192,8 +192,7 @@ class _SqlData extends DataController with InstanceProvider {
   }
 
   @override
-  Future<void> updateEntity(
-      {required Entity old, required Entity newEntity}) async {
+  Future<void> updateEntity(Entity old, Entity newEntity) async {
     assert(old.name == newEntity.name);
     if (old != newEntity) {
       await _database.updateEntity(newEntity);

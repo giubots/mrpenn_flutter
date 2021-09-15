@@ -187,9 +187,9 @@ class Entity extends NamedElement {
     required this.name,
     this.active = true,
     this.preferred = false,
-    this.initialValue = 0,
+    double? initialValue,
     this.inTotal = false,
-  });
+  }) : initialValue = initialValue ?? 0;
 
   @override
   bool operator ==(Object other) =>

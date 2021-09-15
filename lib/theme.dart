@@ -1,4 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+/// The format to display the dates.
+final dateFormatter = DateFormat('dd/MM/yyyy');
+
+/// A function that returns the amount formatted for printing.
+final amountFormatter = NumberFormat('########.##€');
+
+final animationDuration = Duration(milliseconds: 200);
 
 /// Handle the appearance of the app.
 ///
@@ -20,7 +29,7 @@ class AppThemeData {
       colorScheme: colorScheme,
       //textTheme: _textTheme,
       // Matches manifest.json colors and background color.
-      primaryColor: const Color(0xFF030303),
+      primaryColor: colorScheme.primary,
       appBarTheme: AppBarTheme(
         //textTheme: _textTheme.apply(bodyColor: colorScheme.onPrimary),
         color: colorScheme.primary,
@@ -28,6 +37,7 @@ class AppThemeData {
         brightness: colorScheme.brightness,
       ),
       iconTheme: IconThemeData(color: colorScheme.onPrimary),
+      backgroundColor: colorScheme.background,
       canvasColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       scaffoldBackgroundColor: colorScheme.background,

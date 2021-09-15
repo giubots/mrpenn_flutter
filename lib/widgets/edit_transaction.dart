@@ -1,32 +1,39 @@
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/helper.dart';
+import 'package:mrpenn_flutter/theme.dart';
 import 'package:recycle/dropdown_chips.dart';
+import 'package:recycle/helpers.dart';
 import 'package:recycle/round_bottom_app_bar.dart';
 
-/// The format to display the dates.
-final dateFormatter = DateFormat('dd/MM/yyyy');
+Future<IncompleteTransaction?> transactionPage(
+  BuildContext context,
+  Transaction? transaction,
+) =>
+    pushFade<IncompleteTransaction>(
+      context,
+      _EditTransaction(
+        dataController: obtain<DataController>(context),
+        initialData: transaction,
+      ),
+    );
 
-/// A function that returns the amount formatted for printing.
-final amountFormatter = NumberFormat('########.##€');
-
-class NewTransaction extends StatefulWidget {
+class _EditTransaction extends StatefulWidget {
   final validationKey = GlobalKey<_NewTransactionFormState>();
   final Transaction? initialData;
   final DataController dataController;
 
-  NewTransaction({Key? key, this.initialData, required this.dataController})
+  _EditTransaction({Key? key, this.initialData, required this.dataController})
       : super(key: key);
 
   @override
-  _NewTransactionState createState() => _NewTransactionState();
+  _EditTransactionState createState() => _EditTransactionState();
 }
 
-class _NewTransactionState extends State<NewTransaction> {
+class _EditTransactionState extends State<_EditTransaction> {
   var categories, entities;
 
   @override
@@ -71,15 +78,10 @@ class _NewTransactionState extends State<NewTransaction> {
     );
   }
 
-  void onValidate() {
-    widget.validationKey.currentState!.validateAndSave();
-  }
+  void onValidate() => widget.validationKey.currentState!.validateAndSave();
 
-  void onSave(IncompleteTransaction transaction) {
-    //TODO implement
-    print(transaction.toString());
-    Navigator.pop(context);
-  }
+  void onSave(IncompleteTransaction transaction) =>
+      Navigator.pop(context, transaction);
 }
 
 class _NewTransactionForm extends StatefulWidget {
@@ -241,7 +243,7 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
               dateHintText: local(context).date,
               initialDate: _dateTime,
               initialValue: dateFormatter.format(_dateTime),
-              onSaved: (newValue) => _dateTime = DateTime.parse(newValue!),
+              onSaved: (newValue) => _dateTime = dateFormatter.parse(newValue!),
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
             ),

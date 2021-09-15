@@ -1,7 +1,9 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/routes/category.dart';
+import 'package:mrpenn_flutter/routes/entity.dart';
 import 'package:provider/provider.dart';
 import 'package:recycle/helpers.dart';
 import 'package:recycle/round_bottom_app_bar.dart';
@@ -24,12 +26,24 @@ class _SettingsState extends State<Settings> {
           return ListView(
             children: [
               ListTile(
-                title: Text('Category'),
+                leading: Icon(Icons.category),
+                title: Text(local(context).categories),
                 onTap: () => _onCategory(dataController),
               ),
               ListTile(
-                title: Text('Entity'),
-                onTap: null,
+                leading: Icon(Icons.compare_arrows),
+                title: Text(local(context).entities),
+                onTap: () => _onEntity(dataController),
+              ),
+              ListTile(
+                leading: Icon(Icons.file_download),
+                title: Text(local(context).importData),
+                onTap: () => _onImport(dataController),
+              ),
+              ListTile(
+                leading: Icon(Icons.file_upload),
+                title: Text(local(context).exportData),
+                onTap: () => _onExport(dataController),
               ),
             ],
           );
@@ -46,48 +60,58 @@ class _SettingsState extends State<Settings> {
     pushFade(
       context,
       ListPage<Category>(
-        title: 'Categories',
-        elements: list,
-        newElement: (value) => dataController.addCategory(value),
+        title: local(context).categories,
+        existingElements: list,
+        newElement: dataController.addCategory,
         editElement: dataController.updateCategory,
-        details: (value) => NewCategory(usedNames: list.map((e) => e.name), initialValue: value),
+        detailsBuilder: (value) => CategoryDetails(
+          usedNames: list.map((e) => e.name),
+          initialValue: value,
+        ),
       ),
     );
   }
 
-/*  void _onCategory() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => FutureBuilder<DataController>(
-          future: _dataController,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return CategoryPage(
-                categoriesCallback: () => snapshot.data.getAllCategories(),
-                modifiedCategoryCallback: (oldE, newE) => snapshot.data
-                    .updateCategory(old: oldE, newCategory: newE),
-                newCategoryCallback: (entity) =>
-                    snapshot.data.addCategory(entity),
-              );
-            }
-            return const CircularProgressIndicator();
-          },
-        )));*/
+  void _onEntity(DataController dataController) async {
+    final list = await dataController.getAllEntities();
+    pushFade(
+      context,
+      ListPage<Entity>(
+        title: local(context).entities,
+        existingElements: list,
+        newElement: dataController.addEntity,
+        editElement: dataController.updateEntity,
+        detailsBuilder: (value) => EntityDetails(
+          usedNames: list.map((e) => e.name),
+          initialValue: value,
+        ),
+      ),
+    );
+  }
+
+  _onImport(DataController dataController) async {
+    var result = await FilePicker.platform.pickFiles();
+    if (result != null) dataController.import(result.files.single.path);
+  }
+
+  _onExport(DataController dataController) => dataController.export();
 }
-/// Page to display a list of entities or categories.
+
+/// Page to display a list of named elements.
 class ListPage<T extends NamedElement> extends StatefulWidget {
   final String title;
-  final List<T> elements;
+  final List<T> existingElements;
   final Future<void> Function(T value) newElement;
   final Future<void> Function(T oldV, T newV) editElement;
-  final Widget Function(T? value) details;
+  final Widget Function(T? value) detailsBuilder;
 
   const ListPage({
     Key? key,
     required this.title,
-    required this.elements,
+    required this.existingElements,
     required this.newElement,
     required this.editElement,
-    required this.details,
+    required this.detailsBuilder,
   });
 
   @override
@@ -99,34 +123,28 @@ class _ListPageState<T extends NamedElement> extends State<ListPage<T>> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.separated(
-        itemCount: widget.elements.length,
+        itemCount: widget.existingElements.length,
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) => ListTile(
-          title: Text(widget.elements[index].name),
+          title: Text(widget.existingElements[index].name),
           trailing: IconButton(
             icon: const Icon(Icons.mode_edit),
-            onPressed: () => _onModify(widget.elements[index]),
+            onPressed: () => _onModify(widget.existingElements[index]),
           ),
         ),
       ),
       bottomNavigationBar: RoundBottomAppBar(
         title: Text(widget.title),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _onAddCategory,
-          ),
-        ],
+        actions: [IconButton(icon: const Icon(Icons.add), onPressed: _onAdd)],
       ),
     );
   }
 
-  void _onAddCategory() async {
-    var res = await Navigator.of(context).push(
+  void _onAdd() async {
+    var res = await Navigator.push(
+      context,
       MaterialPageRoute(
-        builder: (BuildContext context) => widget.details(null),
-        //usedNames: values.then((v) => v.map((e) => widget.nameGetter(e)).toSet()),        ),
-        fullscreenDialog: true,
+        builder: (BuildContext context) => widget.detailsBuilder(null),
       ),
     );
 
@@ -136,18 +154,16 @@ class _ListPageState<T extends NamedElement> extends State<ListPage<T>> {
     }
   }
 
-  void _onModify(T category) async {
-    var res = await Navigator.of(context).push(
+  void _onModify(T old) async {
+    var res = await Navigator.push(
+      context,
       MaterialPageRoute(
-        builder: (BuildContext context) => widget.details(category),
-        // usedNames: values.then((v) => v.map((e) => widget.nameGetter(e)).toSet()),
-        // initialValue: category,),
-        fullscreenDialog: true,
+        builder: (BuildContext context) => widget.detailsBuilder(old),
       ),
     );
 
     if (res != null) {
-      await widget.editElement(category, res);
+      await widget.editElement(old, res);
       Navigator.pop(context);
     }
   }
