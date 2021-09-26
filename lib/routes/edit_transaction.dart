@@ -202,8 +202,11 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
                       shape: CircleBorder(),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.double_arrow),
-                      onPressed: () => '',
+                      icon: Icon(
+                        Icons.double_arrow,
+                        color: colorScheme.onSecondary,
+                      ),
+                      onPressed: () => '', //TODO
                     ),
                   ),
                 ),

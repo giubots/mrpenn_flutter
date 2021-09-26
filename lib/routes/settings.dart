@@ -123,15 +123,25 @@ class _ListPageState<T extends NamedElement> extends State<ListPage<T>> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.separated(
-        itemCount: widget.existingElements.length,
+        itemCount: widget.existingElements.length +1,
         separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) => ListTile(
-          title: Text(widget.existingElements[index].name),
-          trailing: IconButton(
-            icon: const Icon(Icons.mode_edit),
-            onPressed: () => _onModify(widget.existingElements[index]),
-          ),
-        ),
+        itemBuilder: (context, index) {
+          if (index == 0)
+            return ListTile(
+              tileColor: Theme.of(context).colorScheme.background,
+              leading: Icon(Icons.warning),
+              title: Text(
+                  local(context).warnNames),
+            );
+          index = index - 1;
+          return ListTile(
+            title: Text(widget.existingElements[index].name),
+            trailing: IconButton(
+              icon: const Icon(Icons.mode_edit),
+              onPressed: () => _onModify(widget.existingElements[index]),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: RoundBottomAppBar(
         title: Text(widget.title),

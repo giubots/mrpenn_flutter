@@ -33,10 +33,10 @@ class AppThemeData {
       appBarTheme: AppBarTheme(
         //textTheme: _textTheme.apply(bodyColor: colorScheme.onPrimary),
         color: colorScheme.primary,
-        iconTheme: IconThemeData(color: colorScheme.onPrimary),
+        //iconTheme: IconThemeData(color: colorScheme.onPrimary),
         brightness: colorScheme.brightness,
       ),
-      iconTheme: IconThemeData(color: colorScheme.onPrimary),
+      //iconTheme: IconThemeData(color: colorScheme.onPrimary),
       backgroundColor: colorScheme.background,
       canvasColor: colorScheme.surface,
       cardColor: colorScheme.surface,

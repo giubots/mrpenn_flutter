@@ -5,6 +5,7 @@
   "settings": "Settings",
   "importData": "Import database",
   "exportData": "Export database",
+  "warnNames": "Warning: changing the names of these elements will break existing transactions!",
   "categoryDetails": "Category details",
   "categories": "Categories",
   "name": "Name",

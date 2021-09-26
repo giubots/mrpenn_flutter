@@ -79,6 +79,16 @@ class SqfliteAdapter {
                           '$_notesLabel TEXT, '
                           '$_returnIdLabel INTEGER)',
                         );
+                        await db.insert(
+                          _entitiesTable,
+                          SerializedEntity.fromEntity(model.Entity(
+                            name: 'World',
+                            active: true,
+                            preferred: false,
+                            initialValue: 0,
+                            inTotal: false,
+                          )).toJson(),
+                        );
                       },
                       version: _currentVersion,
                       onOpen: (db) async =>

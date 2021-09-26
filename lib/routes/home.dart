@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/helper.dart';
 import 'package:mrpenn_flutter/widgets/dashboard.dart';
-import 'package:mrpenn_flutter/widgets/edit_transaction.dart';
+import 'package:mrpenn_flutter/routes/edit_transaction.dart';
 import 'package:mrpenn_flutter/widgets/transactions_list.dart';
 import 'package:provider/provider.dart';
 import 'package:recycle/round_bottom_tab_bar.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/helper.dart';
-import 'package:mrpenn_flutter/widgets/edit_transaction.dart';
+import 'package:mrpenn_flutter/routes/edit_transaction.dart';
 import 'package:mrpenn_flutter/widgets/transaction_card.dart';
 import 'package:provider/provider.dart';
 import 'package:recycle/helpers.dart';
