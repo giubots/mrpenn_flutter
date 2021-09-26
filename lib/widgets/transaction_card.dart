@@ -3,10 +3,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/helper.dart';
 import 'package:mrpenn_flutter/theme.dart';
-import 'package:recycle/expandable_container.dart';
 import 'package:recycle/helpers.dart';
 
 typedef TransactionCallback = Future<void> Function(Transaction value);
@@ -16,9 +16,10 @@ class DetailsCard extends StatefulWidget {
   static const double _insets = 16;
   final Transaction transaction;
   final TransactionCallback onDelete;
-  final TransactionCallback onModify;
+  final Function(Transaction value, Object heroTag) onModify;
   final TransactionCallback onFind;
   final TransactionCallback onReturn;
+  final tag;
 
   const DetailsCard({
     Key? key,
@@ -27,116 +28,97 @@ class DetailsCard extends StatefulWidget {
     required this.onFind,
     required this.onModify,
     required this.onReturn,
+    required this.tag,
   }) : super(key: key);
 
   @override
   _DetailsCardState createState() => _DetailsCardState();
 }
 
-class _DetailsCardState extends State<DetailsCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller =
-        AnimationController(vsync: this, duration: animationDuration, value: 1);
-  }
-
+class _DetailsCardState extends State<DetailsCard> {
   @override
   Widget build(BuildContext context) {
-    return ExpandableContainer(
-      animationController: controller,
-      child: Card(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Padding(
-                  padding: const EdgeInsets.only(top: DetailsCard._insets)),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
-                child: _buildTitleRow(context),
-              ),
-              Visibility(
-                visible: widget.transaction.notes.isNotEmpty,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: DetailsCard._insets),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      const Divider(),
-                      Text(
-                        widget.transaction.notes,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w300,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: widget.transaction.categories.isNotEmpty,
-                child: Column(
-                  children: <Widget>[
-                    const Divider(thickness: 1),
-                    Text(local(context).category),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: DetailsCard._insets),
-                      child: Wrap(
-                        spacing: 4.0,
-                        children: widget.transaction.categories.map((i) {
-                          return Chip(label: Text(i.name));
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ButtonBar(
+    return Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Padding(
+              padding: const EdgeInsets.only(top: DetailsCard._insets)),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
+            child: _buildTitleRow(context),
+          ),
+          Visibility(
+            visible: widget.transaction.notes.isNotEmpty,
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Visibility(
-                    visible: widget.transaction.wasReturned,
-                    child: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () => widget.onFind(widget.transaction),
+                  const Divider(),
+                  Text(
+                    widget.transaction.notes,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontStyle: FontStyle.italic,
                     ),
-                  ),
-                  Visibility(
-                    visible: widget.transaction.toReturn &&
-                        !widget.transaction.wasReturned,
-                    child: IconButton(
-                      icon: const Icon(Icons.golf_course),
-                      onPressed: () => widget.onReturn(widget.transaction),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () async {
-                      controller.reverse();
-                      await Future.delayed(
-                          animationDuration - Duration(milliseconds: 100));
-                      await widget.onModify(widget.transaction);
-                      controller.forward();
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => widget.onDelete(widget.transaction),
                   ),
                 ],
               ),
-              //const Padding(padding: const EdgeInsets.only(top: _insets)),
+            ),
+          ),
+          Visibility(
+            visible: widget.transaction.categories.isNotEmpty,
+            child: Column(
+              children: <Widget>[
+                const Divider(thickness: 1),
+                Text(local(context).category),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: DetailsCard._insets),
+                  child: Wrap(
+                    spacing: 4.0,
+                    children: widget.transaction.categories.map((i) {
+                      return Chip(label: Text(i.name));
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ButtonBar(
+            children: <Widget>[
+              Visibility(
+                visible: widget.transaction.wasReturned,
+                child: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () => widget.onFind(widget.transaction),
+                ),
+              ),
+              Visibility(
+                visible: widget.transaction.toReturn &&
+                    !widget.transaction.wasReturned,
+                child: IconButton(
+                  icon: const Icon(Icons.golf_course),
+                  onPressed: () => widget.onReturn(widget.transaction),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () =>
+                    widget.onModify(widget.transaction, widget.tag),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => widget.onDelete(widget.transaction),
+              ),
             ],
           ),
-        ),
+          //const Padding(padding: const EdgeInsets.only(top: _insets)),
+        ],
       ),
     );
   }
@@ -240,7 +222,7 @@ class _DetailsCardState extends State<DetailsCard>
 class TransactionTile extends StatelessWidget {
   final Transaction transaction;
   final TransactionCallback onDelete;
-  final TransactionCallback onModify;
+  final Function(Transaction value, Object heroTag) onModify;
   final TransactionCallback onFind;
   final TransactionCallback onReturn;
   final heroTag = UniqueKey();
@@ -296,6 +278,10 @@ class TransactionTile extends StatelessWidget {
           ),
         ),
       ),
+      flightShuttleBuilder: (flightContext, animation, flightDirection,
+          fromHeroContext, toHeroContext) {
+        return SingleChildScrollView(child: toHeroContext.widget);
+      },
     );
   }
 
@@ -307,18 +293,62 @@ class TransactionTile extends StatelessWidget {
         opaque: false,
         barrierDismissible: true,
         pageBuilder: (context, animation, secondaryAnimation) {
-          return Hero(
-            tag: heroTag,
-            child: DetailsCard(
-              transaction: transaction,
-              onDelete: onDelete,
-              onFind: onFind,
-              onModify: onModify,
-              onReturn: onReturn,
+          return Center(
+            child: Hero(
+              tag: heroTag,
+              child: Material(
+                type: MaterialType.transparency,
+                child: DetailsCard(
+                  transaction: transaction,
+                  onDelete: onDelete,
+                  onFind: onFind,
+                  onModify: onModify,
+                  onReturn: onReturn,
+                  tag: heroTag,
+                ),
+              ),
             ),
           );
         },
       ),
     );
+  }
+}
+
+typedef void OnWidgetSizeChange(Size size);
+
+class MeasureSizeRenderObject extends RenderProxyBox {
+  Size oldSize = Size.zero;
+  final OnWidgetSizeChange onChange;
+
+  MeasureSizeRenderObject(this.onChange);
+
+  @override
+  void performLayout() {
+    super.performLayout();
+
+    Size newSize = child?.size ?? oldSize;
+    print(child?.size);
+    if (oldSize == newSize) return;
+
+    oldSize = newSize;
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      onChange(newSize);
+    });
+  }
+}
+
+class MeasureSize extends SingleChildRenderObjectWidget {
+  final OnWidgetSizeChange onChange;
+
+  const MeasureSize({
+    Key? key,
+    required this.onChange,
+    required Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return MeasureSizeRenderObject(onChange);
   }
 }

@@ -50,9 +50,9 @@ class _TransactionsListState extends State<TransactionsList> {
     //TODO fix returns
   }
 
-  Future<void> _onModify(Transaction transaction) async {
+  Future<void> _onModify(Transaction transaction, Object heroTag) async {
     final controller = obtain<DataController>(context);
-    var created = await transactionPage(context, transaction);
+    var created = await transactionPage(context, transaction, heroTag);
     if (created != null) {
       controller.updateTransaction(
         old: transaction,

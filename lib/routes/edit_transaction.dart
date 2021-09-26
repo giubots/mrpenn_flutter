@@ -11,13 +11,15 @@ import 'package:recycle/round_bottom_app_bar.dart';
 
 Future<IncompleteTransaction?> transactionPage(
   BuildContext context,
-  Transaction? transaction,
-) =>
+  Transaction? transaction, [
+  Object? heroTag,
+]) =>
     pushFade<IncompleteTransaction>(
       context,
       _EditTransaction(
         dataController: obtain<DataController>(context),
         initialData: transaction,
+        heroTag: heroTag ?? '<Default Transaction tag',
       ),
     );
 
@@ -25,9 +27,14 @@ class _EditTransaction extends StatefulWidget {
   final validationKey = GlobalKey<_NewTransactionFormState>();
   final Transaction? initialData;
   final DataController dataController;
+  final Object heroTag;
 
-  _EditTransaction({Key? key, this.initialData, required this.dataController})
-      : super(key: key);
+  _EditTransaction({
+    Key? key,
+    this.initialData,
+    required this.dataController,
+    this.heroTag = '<Default Transaction tag',
+  }) : super(key: key);
 
   @override
   _EditTransactionState createState() => _EditTransactionState();
@@ -46,30 +53,41 @@ class _EditTransactionState extends State<_EditTransaction> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Set<Category>>(
-        future: categories,
-        builder: (context, snapshotC) {
-          return FutureBuilder<Set<Entity>>(
-            future: entities,
-            builder: (context, snapshotE) {
-              if (snapshotC.hasData && snapshotE.hasData) {
-                return ListView(
-                  children: [
-                    const Placeholder(fallbackHeight: 200),
-                    _NewTransactionForm(
-                      key: widget.validationKey,
-                      initialData: widget.initialData,
-                      availableCategories: snapshotC.data!,
-                      availableEntities: snapshotE.data!,
-                      onSubmit: onSave,
-                    ),
-                  ],
-                );
-              }
-              return Center(child: CircularProgressIndicator());
+      body: Hero(
+        tag: widget.heroTag,
+        child: Material(
+          type: MaterialType.transparency,
+          child: FutureBuilder<Set<Category>>(
+            future: categories,
+            builder: (context, snapshotC) {
+              return FutureBuilder<Set<Entity>>(
+                future: entities,
+                builder: (context, snapshotE) {
+                  if (snapshotC.hasData && snapshotE.hasData) {
+                    return ListView(
+                      children: [
+                        const Placeholder(fallbackHeight: 200),
+                        _NewTransactionForm(
+                          key: widget.validationKey,
+                          initialData: widget.initialData,
+                          availableCategories: snapshotC.data!,
+                          availableEntities: snapshotE.data!,
+                          onSubmit: onSave,
+                        ),
+                      ],
+                    );
+                  }
+                  return Center(child: CircularProgressIndicator());
+                },
+              );
             },
-          );
-        },
+          ),
+        ),
+        flightShuttleBuilder: (flightContext, animation, flightDirection,
+                fromHeroContext, toHeroContext) =>
+            flightDirection == HeroFlightDirection.push
+                ? fromHeroContext.widget
+                : toHeroContext.widget,
       ),
       bottomNavigationBar: RoundBottomAppBar(
         title: Center(child: Text(local(context).newTransaction)),
