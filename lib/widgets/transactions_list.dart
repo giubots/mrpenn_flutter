@@ -34,6 +34,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     onModify: _onModify,
                     onFind: _onFind,
                     onReturn: _onReturn,
+                    heroTag: index,
                   );
                 },
                 separatorBuilder: (context, index) => const Divider(),

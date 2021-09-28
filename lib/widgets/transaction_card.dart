@@ -225,7 +225,7 @@ class TransactionTile extends StatelessWidget {
   final Function(Transaction value, Object heroTag) onModify;
   final TransactionCallback onFind;
   final TransactionCallback onReturn;
-  final heroTag = UniqueKey();
+  final Object heroTag;
 
   TransactionTile({
     Key? key,
@@ -234,6 +234,7 @@ class TransactionTile extends StatelessWidget {
     required this.onModify,
     required this.onFind,
     required this.onReturn,
+    required this.heroTag
   }) : super(key: key);
 
   @override
@@ -291,6 +292,7 @@ class TransactionTile extends StatelessWidget {
       null,
       PageRouteBuilder(
         opaque: false,
+        barrierColor: Colors.black54,
         barrierDismissible: true,
         pageBuilder: (context, animation, secondaryAnimation) {
           return Center(
