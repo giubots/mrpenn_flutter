@@ -37,7 +37,7 @@ class _TransactionsListState extends State<TransactionsList> {
                     heroTag: index,
                   );
                 },
-                separatorBuilder: (context, index) => const Divider(),
+                separatorBuilder: (_, __) => const Divider(height: 0.5),
               );
             }
             return const Center(child: const CircularProgressIndicator());
@@ -47,7 +47,7 @@ class _TransactionsListState extends State<TransactionsList> {
     );
   }
 
-  Future<void> _onReturn(Transaction transaction) async{
+  Future<void> _onReturn(Transaction transaction) async {
     //TODO fix returns
   }
 
@@ -63,7 +63,7 @@ class _TransactionsListState extends State<TransactionsList> {
     }
   }
 
-  Future<void>  _onDelete(Transaction transaction) async {
+  Future<void> _onDelete(Transaction transaction) async {
     final controller = obtain<DataController>(context);
     var confirm = await showDialog(
       barrierDismissible: false,
@@ -89,7 +89,7 @@ class _TransactionsListState extends State<TransactionsList> {
     }
   }
 
-  Future<void> _onFind(Transaction value) async{
+  Future<void> _onFind(Transaction value) async {
     //TODO: implement
   }
 }

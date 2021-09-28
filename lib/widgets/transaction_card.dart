@@ -38,74 +38,139 @@ class DetailsCard extends StatefulWidget {
 class _DetailsCardState extends State<DetailsCard> {
   @override
   Widget build(BuildContext context) {
-    return Card(
+    final titleRow = Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.transaction.title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
+                fontSize: 20,
+                height: 1,
+              ),
+            ),
+            Text(
+              amountFormatter.format(widget.transaction.amount),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 50,
+                height: 1,
+              ),
+            ),
+            Text(
+              dateFormatter.format(widget.transaction.dateTime),
+              style: const TextStyle(
+                fontWeight: FontWeight.w300,
+                fontSize: 20,
+                height: 0.5,
+              ),
+            ),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (widget.transaction.toReturn && !widget.transaction.wasReturned)
+              Column(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        local(context).toReturn,
+                        style: const TextStyle(fontSize: 20),
+                      ),
+                      const Padding(padding: const EdgeInsets.all(2)),
+                      const Icon(Icons.flag),
+                    ],
+                  ),
+                  const Divider(),
+                ],
+              ),
+            if (widget.transaction.wasReturned)
+              Row(
+                children: [
+                  const Icon(Icons.money_off),
+                  const Padding(padding: const EdgeInsets.all(2)),
+                  Text(
+                    local(context).toReturn,
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                ],
+              ),
+            Text(
+              widget.transaction.originEntity.name,
+              style: const TextStyle(fontSize: 20),
+            ),
+            RotatedBox(quarterTurns: 1, child: const Icon(Icons.double_arrow)),
+            Text(
+              widget.transaction.destinationEntity.name,
+              style: const TextStyle(fontSize: 20),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final cardContents = Padding(
+      padding: const EdgeInsets.all(DetailsCard._insets),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Padding(
-              padding: const EdgeInsets.only(top: DetailsCard._insets)),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
-            child: _buildTitleRow(context),
-          ),
-          Visibility(
-            visible: widget.transaction.notes.isNotEmpty,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Divider(),
-                  Text(
-                    widget.transaction.notes,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Visibility(
-            visible: widget.transaction.categories.isNotEmpty,
-            child: Column(
-              children: <Widget>[
-                const Divider(thickness: 1),
-                Text(local(context).category),
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: DetailsCard._insets),
-                  child: Wrap(
-                    spacing: 4.0,
-                    children: widget.transaction.categories.map((i) {
-                      return Chip(label: Text(i.name));
-                    }).toList(),
+          titleRow,
+          if (widget.transaction.notes.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Divider(),
+                Text(
+                  widget.transaction.notes,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w300,
+                    fontStyle: FontStyle.italic,
                   ),
                 ),
               ],
             ),
-          ),
+          if (widget.transaction.categories.isNotEmpty)
+            Column(
+              children: [
+                const Divider(thickness: 1),
+                Text(local(context).category),
+                Wrap(
+                  spacing: 4.0,
+                  children: widget.transaction.categories.map((i) {
+                    return Chip(label: Text(i.name));
+                  }).toList(),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: DetailsCard._insets),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          cardContents,
           ButtonBar(
-            children: <Widget>[
-              Visibility(
-                visible: widget.transaction.wasReturned,
-                child: IconButton(
+            children: [
+              if (widget.transaction.wasReturned)
+                IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () => widget.onFind(widget.transaction),
                 ),
-              ),
-              Visibility(
-                visible: widget.transaction.toReturn &&
-                    !widget.transaction.wasReturned,
-                child: IconButton(
-                  icon: const Icon(Icons.golf_course),
+              if (widget.transaction.toReturn &&
+                  !widget.transaction.wasReturned)
+                IconButton(
+                  icon: const Icon(Icons.flag_outlined),
                   onPressed: () => widget.onReturn(widget.transaction),
                 ),
-              ),
               IconButton(
                 icon: const Icon(Icons.edit),
                 onPressed: () =>
@@ -114,102 +179,6 @@ class _DetailsCardState extends State<DetailsCard> {
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => widget.onDelete(widget.transaction),
-              ),
-            ],
-          ),
-          //const Padding(padding: const EdgeInsets.only(top: _insets)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTitleRow(BuildContext context) {
-    return Material(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  widget.transaction.title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 20,
-                    height: 1,
-                  ),
-                ),
-                Text(
-                  amountFormatter.format(widget.transaction.amount),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 50,
-                    height: 1,
-                  ),
-                ),
-                Text(
-                  dateFormatter.format(widget.transaction.dateTime),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 20,
-                    height: 0.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Material(
-                child: Row(
-                  children: <Widget>[
-                    Material(child: const Icon(Icons.source)),
-                    const Padding(padding: const EdgeInsets.all(2)),
-                    Text(
-                      widget.transaction.originEntity.name,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                children: <Widget>[
-                  const Icon(Icons.festival),
-                  const Padding(padding: const EdgeInsets.all(2)),
-                  Text(
-                    widget.transaction.destinationEntity.name,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                ],
-              ),
-              Visibility(
-                visible: widget.transaction.toReturn &&
-                    !widget.transaction.wasReturned,
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.keyboard_return),
-                    const Padding(padding: const EdgeInsets.all(2)),
-                    Text(
-                      local(context).toReturn,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-              Visibility(
-                visible: widget.transaction.wasReturned,
-                child: Row(
-                  children: <Widget>[
-                    const Icon(Icons.keyboard_return),
-                    const Padding(padding: const EdgeInsets.all(2)),
-                    Text(
-                      local(context).toReturn,
-                      style: const TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
               ),
             ],
           ),
@@ -227,15 +196,15 @@ class TransactionTile extends StatelessWidget {
   final TransactionCallback onReturn;
   final Object heroTag;
 
-  TransactionTile({
-    Key? key,
-    required this.transaction,
-    required this.onDelete,
-    required this.onModify,
-    required this.onFind,
-    required this.onReturn,
-    required this.heroTag
-  }) : super(key: key);
+  TransactionTile(
+      {Key? key,
+      required this.transaction,
+      required this.onDelete,
+      required this.onModify,
+      required this.onFind,
+      required this.onReturn,
+      required this.heroTag})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +233,8 @@ class TransactionTile extends StatelessWidget {
         type: MaterialType.transparency,
         child: Center(
           child: ListTile(
+contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            tileColor: Theme.of(context).colorScheme.surface,
             leading: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
