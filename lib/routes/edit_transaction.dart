@@ -264,7 +264,7 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
               dateHintText: local(context).date,
               initialDate: _dateTime,
               initialValue: dateFormatter.format(_dateTime),
-              onSaved: (newValue) => _dateTime = dateFormatter.parse(newValue!),
+              onSaved: (newValue) => _dateTime = DateTime.parse(newValue!), //FIXME
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
             ),

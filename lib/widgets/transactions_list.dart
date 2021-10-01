@@ -6,6 +6,8 @@ import 'package:mrpenn_flutter/routes/edit_transaction.dart';
 import 'package:mrpenn_flutter/widgets/transaction_card.dart';
 import 'package:provider/provider.dart';
 import 'package:recycle/helpers.dart';
+import 'package:recycle/round_app_bar.dart';
+import 'package:recycle/search_bar.dart';
 
 class TransactionsList extends StatefulWidget {
   const TransactionsList({Key? key}) : super(key: key);
@@ -15,36 +17,64 @@ class TransactionsList extends StatefulWidget {
 }
 
 class _TransactionsListState extends State<TransactionsList> {
+  var onlyToReturn = false;
+  var onlyText = '';
+
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Consumer<DataController>(
       builder: (context, controller, child) {
-        return StreamBuilder<List<Transaction>>(
-          stream: controller.getStream(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final data = snapshot.data!;
-              return ListView.separated(
-                itemCount: data.length,
-                itemBuilder: (context, index) {
-                  final item = data[index];
-                  return TransactionTile(
-                    transaction: item,
-                    onDelete: _onDelete,
-                    onModify: _onModify,
-                    onFind: _onFind,
-                    onReturn: _onReturn,
-                    heroTag: index,
+        return Scaffold(
+            appBar: RoundAppBar(
+              child: SearchBar(
+                fillColor: cs.primaryVariant,
+                textColor: cs.onPrimary,
+                hintColor: cs.onPrimary,
+                iconColor: cs.onPrimary,
+                onChanged: (value) => setState(() => onlyText = value),
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () => setState(() => onlyToReturn = !onlyToReturn),
+                  icon: Icon(onlyToReturn ? Icons.flag : Icons.flag_outlined),
+                ),
+              ],
+            ),
+            body: StreamBuilder<List<Transaction>>(
+              stream: controller.getStream(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final data = snapshot.data!.where(_keep).toList();
+                  return ListView.separated(
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      final item = data[index];
+                      return TransactionTile(
+                        transaction: item,
+                        onDelete: _onDelete,
+                        onModify: _onModify,
+                        onFind: _onFind,
+                        onReturn: _onReturn,
+                        heroTag: index,
+                      );
+                    },
+                    separatorBuilder: (_, __) => const Divider(height: 0.5),
                   );
-                },
-                separatorBuilder: (_, __) => const Divider(height: 0.5),
-              );
-            }
-            return const Center(child: const CircularProgressIndicator());
-          },
-        );
+                }
+                return const Center(child: const CircularProgressIndicator());
+              },
+            ));
       },
     );
+  }
+
+  bool _keep(Transaction transaction) {
+    final keepText =
+        onlyText.trim().isEmpty || transaction.title.contains(onlyText);
+    final keepFlag = !onlyToReturn || transaction.toReturn;
+    return keepText && keepFlag;
   }
 
   Future<void> _onReturn(Transaction transaction) async {
@@ -93,3 +123,44 @@ class _TransactionsListState extends State<TransactionsList> {
     //TODO: implement
   }
 }
+
+// class _TList extends StatefulWidget {
+//   final Future<List<Transaction>> transactions;
+//
+//   const _TList({Key? key, required this.transactions}) : super(key: key);
+//
+//   @override
+//   __TListState createState() => __TListState();
+// }
+//
+// class __TListState extends State<_TList> {
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<List<Transaction>>(
+//       future: widget.transactions,
+//       builder: (context, snapshot) {
+//         if (snapshot.hasData) {
+//           final data = snapshot.data!;
+//           return ListView.separated(
+//             itemCount: data.length,
+//             itemBuilder: (context, index) {
+//               final item = data[index];
+//               return TransactionTile(
+//                 transaction: item,
+//                 onDelete: _onDelete,
+//                 onModify: _onModify,
+//                 onFind: _onFind,
+//                 onReturn: _onReturn,
+//                 heroTag: index,
+//               );
+//             },
+//             separatorBuilder: (_, __) => const Divider(height: 0.5),
+//           );
+//         }
+//         return const Center(child: const CircularProgressIndicator());
+//       },
+//     );
+//   }
+//
+//
+// }

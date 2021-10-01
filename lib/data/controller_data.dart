@@ -42,6 +42,16 @@ abstract class DataController {
   /// Returns a stream with the transaction snapshots.
   Stream<List<Transaction>> getStream();
 
+  /// Returns a filtered list of transactions.
+  Future<List<Transaction>> filter({
+    String onlyContaining,
+    bool onlyToReturn,
+    DateTime? since,
+    DateTime? until,
+    Iterable<Entity>? onlyEntities,
+    Iterable<Category>? onlyCategories,
+  });
+
   /// Adds a transaction, also sets its id.
   Future<void> addTransaction(IncompleteTransaction toAdd);
 
@@ -130,6 +140,16 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Stream<List<Transaction>> getStream() => _streamController.stream;
+
+  @override
+  Future<List<Transaction>> filter({
+    String onlyContaining = '',
+    bool onlyToReturn = false,
+    DateTime? since,
+    DateTime? until,
+    Iterable<Entity>? onlyEntities,
+    Iterable<Category>? onlyCategories,
+  }) => getStream().first; //TODO: implement
 
   @override
   Future<void> addTransaction(IncompleteTransaction toAdd) async {
