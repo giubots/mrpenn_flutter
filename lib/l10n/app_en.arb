@@ -33,5 +33,10 @@
   "confirmDeletion": "Confirm deletion",
   "warningIrreversible": "This action can not be undone!",
   "confirm": "Confirm",
-  "abort": "Abort"
+  "abort": "Abort",
+  "toolSum": "Totals",
+  "toolSumEntity": "Entity",
+  "toolSumUntil": "Until",
+  "toolSumThisMonth": "This month",
+  "toolSumLastMonth": "Last month"
 }

@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:mrpenn_flutter/helper.dart';
 import 'package:mrpenn_flutter/routes/settings.dart';
+import 'package:mrpenn_flutter/widgets/recap_tool.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({Key? key}) : super(key: key);
@@ -18,7 +19,7 @@ class _DashboardState extends State<Dashboard> {
 
     return ListView(
       children: [
-        Placeholder(),
+        ToolsList(tools: [EntitySums()]),
         ListTile(
           title: Text(local(context).appCopyright),
           trailing: OpenContainer(

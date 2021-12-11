@@ -91,7 +91,7 @@ class _SettingsState extends State<Settings> {
 
   _onImport(DataController dataController) async {
     var result = await FilePicker.platform.pickFiles();
-    if (result != null) dataController.import(result.files.single.path);
+    if (result != null) dataController.import(result.files.single.path!);
   }
 
   _onExport(DataController dataController) => dataController.export();
