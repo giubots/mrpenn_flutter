@@ -76,6 +76,8 @@ abstract class DataController {
 
   Future<void> export();
 
+  Future<Iterable> serialize();
+
   Future<void> import(String source);
 }
 
@@ -149,7 +151,8 @@ class _SqlData extends DataController with InstanceProvider {
     DateTime? until,
     Iterable<Entity>? onlyEntities,
     Iterable<Category>? onlyCategories,
-  }) => getStream().first; //TODO: implement
+  }) =>
+      getStream().first; //TODO: implement
 
   @override
   Future<void> addTransaction(IncompleteTransaction toAdd) async {
@@ -315,6 +318,10 @@ class _SqlData extends DataController with InstanceProvider {
     sleep(Duration(milliseconds: 10));
     return _setup();
   }
+
+  @override
+  Future<Iterable> serialize() async =>
+      _transactions.map((e) => SerializedTransaction.fromTransaction(e).toJson());
 }
 
 /// Returns an unique id. Ids should be ordered and do not repeat.

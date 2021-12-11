@@ -5,6 +5,8 @@
   "settings": "Settings",
   "importData": "Import database",
   "exportData": "Export database",
+  "copyData": "Copy transactions to clipboard",
+  "dataCopied": "Data copied in the clipboard",
   "warnNames": "Warning: changing the names of these elements will break existing transactions!",
   "categoryDetails": "Category details",
   "categories": "Categories",

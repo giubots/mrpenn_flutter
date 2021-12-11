@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/routes/category.dart';
@@ -44,6 +45,11 @@ class _SettingsState extends State<Settings> {
                 leading: Icon(Icons.file_upload),
                 title: Text(local(context).exportData),
                 onTap: () => _onExport(dataController),
+              ),
+              ListTile(
+                leading: Icon(Icons.copy_all),
+                title: Text(local(context).copyData),
+                onTap: () => _onCopy(dataController),
               ),
             ],
           );
@@ -95,6 +101,11 @@ class _SettingsState extends State<Settings> {
   }
 
   _onExport(DataController dataController) => dataController.export();
+
+  _onCopy(DataController dataController) => dataController.serialize().then(
+      (value) => Clipboard.setData(ClipboardData(text: value.toString())).then(
+          (_) => ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(local(context).dataCopied)))));
 }
 
 /// Page to display a list of named elements.
@@ -123,15 +134,14 @@ class _ListPageState<T extends NamedElement> extends State<ListPage<T>> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.separated(
-        itemCount: widget.existingElements.length +1,
+        itemCount: widget.existingElements.length + 1,
         separatorBuilder: (context, index) => const Divider(),
         itemBuilder: (context, index) {
           if (index == 0)
             return ListTile(
               tileColor: Theme.of(context).colorScheme.background,
               leading: Icon(Icons.warning),
-              title: Text(
-                  local(context).warnNames),
+              title: Text(local(context).warnNames),
             );
           index = index - 1;
           return ListTile(
