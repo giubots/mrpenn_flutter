@@ -18,6 +18,7 @@ class TransactionsList extends StatefulWidget {
 
 class _TransactionsListState extends State<TransactionsList> {
   var onlyToReturn = false;
+  var sortDate = true;
   var onlyText = '';
 
   @override
@@ -40,13 +41,21 @@ class _TransactionsListState extends State<TransactionsList> {
                   onPressed: () => setState(() => onlyToReturn = !onlyToReturn),
                   icon: Icon(onlyToReturn ? Icons.flag : Icons.flag_outlined),
                 ),
+                IconButton(
+                  onPressed: () => setState(() => sortDate = !sortDate),
+                  icon: Icon(
+                      sortDate ? Icons.schedule : Icons.history_toggle_off),
+                ),
               ],
             ),
             body: StreamBuilder<List<Transaction>>(
               stream: controller.getStream(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  final data = snapshot.data!.where(_keep).toList();
+                  final data =
+                      snapshot.data!.where(_keep).toList().reversed.toList();
+                  if (sortDate)
+                    data.sort((a, b) => b.dateTime.compareTo(a.dateTime));
                   return ListView.separated(
                     itemCount: data.length,
                     itemBuilder: (context, index) {
