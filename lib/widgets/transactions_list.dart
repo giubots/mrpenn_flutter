@@ -87,7 +87,11 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   Future<void> _onReturn(Transaction transaction) async {
-    //TODO fix returns
+    obtain<DataController>(context).updateTransaction(
+      old: transaction,
+      newTransaction: Transaction.from(transaction, toReturn: false),
+    );
+    Navigator.of(context).pop();
   }
 
   Future<void> _onModify(Transaction transaction, Object heroTag) async {
