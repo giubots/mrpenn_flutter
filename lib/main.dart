@@ -4,16 +4,11 @@ import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/routes/home.dart';
 import 'package:mrpenn_flutter/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:recycle/loading_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    LoadingScreen<DataController>(
-      work: DataController.instance(),
-      nextWidget: ({data}) => MyApp(dataController: data!),
-    ),
-  );
+  final controller = await DataController.instance();
+  runApp(MyApp(dataController: controller));
 }
 
 class MyApp extends StatelessWidget {
