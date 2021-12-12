@@ -67,7 +67,7 @@ class _EntityDetailsState extends State<EntityDetails> {
                   onSaved: (newValue) => _name = newValue,
                 ),
                 TextFormField(
-                  initialValue: widget.initialValue?.initialValue?.toString(),
+                  initialValue: widget.initialValue?.initialValue.toString(),
                   keyboardType: TextInputType.number,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp('[0-9.]'))

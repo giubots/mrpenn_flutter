@@ -34,7 +34,6 @@ class AppThemeData {
         //textTheme: _textTheme.apply(bodyColor: colorScheme.onPrimary),
         color: colorScheme.primary,
         //iconTheme: IconThemeData(color: colorScheme.onPrimary),
-        brightness: colorScheme.brightness,
       ),
       //iconTheme: IconThemeData(color: colorScheme.onPrimary),
       backgroundColor: colorScheme.background,
@@ -42,7 +41,6 @@ class AppThemeData {
       cardColor: colorScheme.surface,
       scaffoldBackgroundColor: colorScheme.background,
       highlightColor: Colors.transparent,
-      accentColor: colorScheme.primary,
       focusColor: focusColor,
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,

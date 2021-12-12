@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -103,7 +105,7 @@ class _SettingsState extends State<Settings> {
   _onExport(DataController dataController) => dataController.export();
 
   _onCopy(DataController dataController) => dataController.serialize().then(
-      (value) => Clipboard.setData(ClipboardData(text: value.toString())).then(
+      (value) => Clipboard.setData(ClipboardData(text: jsonEncode(value))).then(//TODO: fix
           (_) => ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(local(context).dataCopied)))));
 }
