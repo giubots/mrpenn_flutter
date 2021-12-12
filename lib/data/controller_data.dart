@@ -321,7 +321,7 @@ class _SqlData extends DataController with InstanceProvider {
 
   @override
   Future<Iterable> serialize() async =>
-      _transactions.map((e) => SerializedTransaction.fromTransaction(e).toJson());
+      _transactions.map((e) => SerializedTransaction.fromTransaction(e)).toList();
 }
 
 /// Returns an unique id. Ids should be ordered and do not repeat.
