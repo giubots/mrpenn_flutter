@@ -1,6 +1,7 @@
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:mrpenn_flutter/data/controller_data.dart';
 import 'package:mrpenn_flutter/data/model.dart';
 import 'package:mrpenn_flutter/helper.dart';
@@ -9,11 +10,10 @@ import 'package:recycle/dropdown_chips.dart';
 import 'package:recycle/helpers.dart';
 import 'package:recycle/round_bottom_app_bar.dart';
 
-Future<IncompleteTransaction?> transactionPage(
-  BuildContext context,
-  Transaction? transaction, [
-  Object? heroTag,
-]) =>
+Future<IncompleteTransaction?> transactionPage(BuildContext context,
+    Transaction? transaction, [
+      Object? heroTag,
+    ]) =>
     pushFade<IncompleteTransaction>(
       context,
       _EditTransaction(
@@ -66,7 +66,6 @@ class _EditTransactionState extends State<_EditTransaction> {
                   if (snapshotC.hasData && snapshotE.hasData) {
                     return ListView(
                       children: [
-                        const Placeholder(fallbackHeight: 200),
                         _NewTransactionForm(
                           key: widget.validationKey,
                           initialData: widget.initialData,
@@ -84,10 +83,10 @@ class _EditTransactionState extends State<_EditTransaction> {
           ),
         ),
         flightShuttleBuilder: (flightContext, animation, flightDirection,
-                fromHeroContext, toHeroContext) =>
-            flightDirection == HeroFlightDirection.push
-                ? fromHeroContext.widget
-                : toHeroContext.widget,
+            fromHeroContext, toHeroContext) =>
+        flightDirection == HeroFlightDirection.push
+            ? fromHeroContext.widget
+            : toHeroContext.widget,
       ),
       bottomNavigationBar: RoundBottomAppBar(
         title: Center(child: Text(local(context).newTransaction)),
@@ -108,12 +107,11 @@ class _NewTransactionForm extends StatefulWidget {
   final Set<Entity> availableEntities;
   final void Function(IncompleteTransaction transaction) onSubmit;
 
-  const _NewTransactionForm(
-      {Key? key,
-      this.initialData,
-      required this.availableCategories,
-      required this.availableEntities,
-      required this.onSubmit})
+  const _NewTransactionForm({Key? key,
+    this.initialData,
+    required this.availableCategories,
+    required this.availableEntities,
+    required this.onSubmit})
       : super(key: key);
 
   @override
@@ -123,7 +121,7 @@ class _NewTransactionForm extends StatefulWidget {
 class _NewTransactionFormState extends State<_NewTransactionForm> {
   final _formKey = GlobalKey<FormState>();
   final _notNullValidator = (BuildContext context, dynamic value) =>
-      value == null ? local(context).emptyFieldErr : null;
+  value == null ? local(context).emptyFieldErr : null;
 
   String? _title;
   double? _amount;
@@ -150,6 +148,9 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
     if (_destinationEntity != null)
       widget.availableEntities.add(_destinationEntity!);
     widget.availableCategories.addAll(_selectedCategories);
+
+    print(DateFormat.yMd().format(_dateTime));
+    print(dateFormatter.format(_dateTime));
   }
 
   @override
@@ -157,7 +158,9 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
     final entityButtons = widget.availableEntities.map((e) {
       return DropdownMenuItem(value: e, child: Text(e.name));
     }).toList();
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme
+        .of(context)
+        .colorScheme;
 
     return Form(
       key: _formKey,
@@ -170,11 +173,14 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
             title: TextFormField(
               initialValue: _amount?.toString(),
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.next,
+              autofocus: true,
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp('[0-9.]'))
               ],
               decoration: InputDecoration(hintText: local(context).amount),
-              validator: (value) => (double.tryParse(value ?? "-1") ?? -1) < 0
+              validator: (value) =>
+              (double.tryParse(value ?? "-1") ?? -1) < 0
                   ? local(context).amountErr
                   : null,
               onSaved: (newValue) => _amount = double.parse(newValue!),
@@ -185,7 +191,8 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
             title: TextFormField(
               initialValue: _title,
               decoration: InputDecoration(hintText: local(context).description),
-              validator: (value) => (value?.isEmpty ?? true)
+              validator: (value) =>
+              (value?.isEmpty ?? true)
                   ? local(context).emptyFieldErr
                   : null,
               onSaved: (newValue) => _title = newValue,
@@ -207,7 +214,7 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
                       border: UnderlineInputBorder(borderSide: BorderSide.none),
                     ),
                     validator: (value) => _notNullValidator(context, value),
-                    onChanged: (value) => null,
+                    onChanged: (value) => _originEntity = value,
                     onSaved: (newValue) => _originEntity = newValue,
                   ),
                 ),
@@ -224,7 +231,7 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
                         Icons.double_arrow,
                         color: colorScheme.onSecondary,
                       ),
-                      onPressed: () => '', //TODO
+                      onPressed: switchEntities,
                     ),
                   ),
                 ),
@@ -237,9 +244,9 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
                     decoration: InputDecoration(
                         hintText: local(context).destination,
                         border:
-                            UnderlineInputBorder(borderSide: BorderSide.none)),
+                        UnderlineInputBorder(borderSide: BorderSide.none)),
                     validator: (value) => _notNullValidator(context, value),
-                    onChanged: (value) => null,
+                    onChanged: (value) => _destinationEntity = value,
                     onSaved: (newValue) => _destinationEntity = newValue,
                   ),
                 ),
@@ -262,9 +269,20 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
             title: DateTimePicker(
               type: DateTimePickerType.date,
               dateHintText: local(context).date,
-              initialDate: _dateTime,
-              initialValue: dateFormatter.format(_dateTime),
-              onSaved: (newValue) => _dateTime = DateTime.parse(newValue!), //FIXME
+              initialValue: DateFormat('yyyy-MM-dd').format(_dateTime),
+              dateMask: 'dd/MM/yyyy',
+              onSaved: (newValue) {
+                try {
+                  _dateTime = DateFormat('yyyy-MM-dd').parse(newValue!);
+                } on FormatException {
+                  try {
+                    _dateTime = dateFormatter.parse(newValue!);
+                  } on FormatException {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Parsing error: $newValue')));
+                  }
+                }
+              },
               firstDate: DateTime(2000),
               lastDate: DateTime.now(),
             ),
@@ -279,7 +297,10 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
           ),
           SwitchListTile(
             secondary: Icon(Icons.replay),
-            activeColor: Theme.of(context).colorScheme.secondary,
+            activeColor: Theme
+                .of(context)
+                .colorScheme
+                .secondary,
             value: _toReturn,
             title: Text(local(context).toReturn),
             onChanged: (value) => setState(() => _toReturn = !_toReturn),
@@ -303,5 +324,13 @@ class _NewTransactionFormState extends State<_NewTransactionForm> {
           toReturn: _toReturn,
           returnId: _toReturn ? widget.initialData?.returnId : null));
     }
+  }
+
+  void switchEntities() async {
+    setState(() {
+      var temp = _originEntity;
+      _originEntity = _destinationEntity;
+      _destinationEntity = temp;
+    });
   }
 }
