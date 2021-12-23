@@ -87,7 +87,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   void newTransaction(DataController controller) async {
     setState(() => visible = false);
-    await Future.delayed(Duration(milliseconds: 200));
+    await Future.delayed(Duration(milliseconds: 150));
     var toAdd = await transactionPage(context, null);
     if (toAdd != null) controller.addTransaction(toAdd);
     setState(() => visible = true);

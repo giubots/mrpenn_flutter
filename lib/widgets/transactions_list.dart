@@ -80,8 +80,8 @@ class _TransactionsListState extends State<TransactionsList> {
   }
 
   bool _keep(Transaction transaction) {
-    final keepText =
-        onlyText.trim().isEmpty || transaction.title.contains(onlyText);
+    final keepText = onlyText.trim().isEmpty ||
+        transaction.title.toLowerCase().contains(onlyText.toLowerCase());
     final keepFlag = !onlyToReturn || transaction.toReturn;
     return keepText && keepFlag;
   }
