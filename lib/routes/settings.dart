@@ -48,11 +48,6 @@ class _SettingsState extends State<Settings> {
                 title: Text(local(context).exportData),
                 onTap: () => _onExport(dataController),
               ),
-              ListTile(
-                leading: Icon(Icons.copy_all),
-                title: Text(local(context).copyData),
-                onTap: () => _onCopy(dataController),
-              ),
             ],
           );
         },
