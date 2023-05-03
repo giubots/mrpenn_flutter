@@ -1,5 +1,3 @@
-import 'package:meta/meta.dart';
-
 /// A transaction of money from a origin to a destination.
 ///
 /// This transaction does not have an id and must be completed before submitting it.
@@ -29,23 +27,21 @@ class IncompleteTransaction {
   final String notes;
 
   /// If the transaction had to be returned and was, this is the returning transaction.
-  final int returnId;
+  final int? returnId;
 
   /// Construct an incomplete transaction.
   IncompleteTransaction({
-    @required this.title,
-    @required this.amount,
-    @required this.originEntity,
-    @required this.destinationEntity,
+    required this.title,
+    required this.amount,
+    required this.originEntity,
+    required this.destinationEntity,
     categories,
     toReturn,
-    DateTime dateTime,
+    DateTime? dateTime,
     notes,
     this.returnId,
-  })  : assert(title != null && title.isNotEmpty),
-        assert(amount != null && amount >= 0),
-        assert(originEntity != null),
-        assert(destinationEntity != null),
+  })  : assert(title.isNotEmpty),
+        assert(amount >= 0),
         assert((toReturn ?? false) || (returnId == null)),
         categories = categories ?? {},
         toReturn = toReturn ?? false,
@@ -104,18 +100,17 @@ class Transaction extends IncompleteTransaction {
 
   /// Constructs a complete transaction.
   Transaction({
-    @required title,
-    @required this.id,
-    @required amount,
-    @required originEntity,
-    @required destinationEntity,
+    required title,
+    required this.id,
+    required amount,
+    required originEntity,
+    required destinationEntity,
     categories,
     toReturn,
-    DateTime dateTime,
+    DateTime? dateTime,
     notes,
     returnId,
-  })  : assert(id != null),
-        super(
+  }) : super(
           title: title,
           amount: amount,
           originEntity: originEntity,
@@ -136,7 +131,7 @@ class Transaction extends IncompleteTransaction {
     destinationEntity,
     categories,
     toReturn,
-    DateTime dateTime,
+    DateTime? dateTime,
     notes,
     returnId,
   })  : id = toCopy.id,
@@ -167,8 +162,12 @@ class Transaction extends IncompleteTransaction {
   int get hashCode => super.hashCode ^ id.hashCode;
 }
 
+abstract class NamedElement {
+  String get name;
+}
+
 /// An entity can be a source or destination for transactions.
-class Entity {
+class Entity extends NamedElement {
   /// The name of this.
   final String name;
 
@@ -185,12 +184,12 @@ class Entity {
   bool inTotal;
 
   Entity({
-    @required this.name,
+    required this.name,
     this.active = true,
     this.preferred = false,
-    this.initialValue = 0,
+    double? initialValue,
     this.inTotal = false,
-  }) : assert(name != null);
+  }) : initialValue = initialValue ?? 0;
 
   @override
   bool operator ==(Object other) =>
@@ -213,7 +212,7 @@ class Entity {
 }
 
 /// A category for organizing the transactions.
-class Category {
+class Category extends NamedElement {
   /// The name of this.
   final String name;
 
@@ -227,11 +226,11 @@ class Category {
   bool positive;
 
   Category({
-    @required this.name,
+    required this.name,
     this.active = true,
     this.preferred = false,
     this.positive = true,
-  }) : assert(name != null);
+  });
 
   @override
   bool operator ==(Object other) =>

@@ -1,35 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:mrpenn_flutter/data/controller_data.dart';
+import 'package:mrpenn_flutter/routes/home.dart';
+import 'package:mrpenn_flutter/theme.dart';
+import 'package:provider/provider.dart';
 
-import 'localization/localization.dart';
-import 'widget_home.dart';
-
-void main() => runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final controller = await DataController.instance();
+  runApp(MyApp(dataController: controller));
+}
 
 class MyApp extends StatelessWidget {
+  final DataController dataController;
+
+  const MyApp({Key? key, required this.dataController}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mr Penn',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.lightBlue,
-        accentColor: Colors.orangeAccent,
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const Home(),
+    return Provider<DataController>.value(
+      value: dataController,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Mr Penn',
+          theme: AppThemeData.lightThemeData,
+          home: const Home(),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        );
       },
-      localizationsDelegates: [
-        const AppLocalizationsDelegate(),
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        //GlobalCupertinoLocalizations.delegate,//FIXME iOS
-      ],
-      supportedLocales: [
-        const Locale('en'),
-        const Locale('it'),
-      ],
     );
   }
 }
